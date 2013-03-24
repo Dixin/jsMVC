@@ -1,0 +1,108 @@
+﻿<package id="build">
+    <job id="mergeAndMinify">
+        <runtime>
+            <description>Merge JavaScript files to jsMVC.js, then minify to jsMVC.min.js.</description>
+            <named name="source" helpstring="The path of source folder." required="false" type="string" />
+            <named name="build" helpstring="The path of build folder." required="false" type="string" />
+            <!-- cscript $(ProjectDir)build\windows.wsf /source:$(ProjectDir)source\ /build:$(ProjectDir)build\ -->
+        </runtime>
+        <script type="text/javascript">
+            (function() {
+                var defaultSourceFolder = "..\\source\\",
+                    defaultBuildFolder = ".\\",
+                    namedArguments = WScript.Arguments.Named,
+                    sourceFolder = namedArguments("source") || defaultSourceFolder,
+                    buildFolder = namedArguments("build") || defaultBuildFolder,
+                    list = sourceFolder + "_references.js",
+                    buildFile = buildFolder + "jsMVC.js",
+                    minFile = buildFolder + "jsMVC.min.js",
+                    minifier = "http://marijnhaverbeke.nl/uglifyjs",
+                    index,
+                    log = function(message) {
+                        WScript.Echo(message);
+                    },
+                    fileSystem = new ActiveXObject("Scripting.FileSystemObject"),
+                    forReading = 1,
+                    forWriting = 2,
+                    createFile = true,
+                    doNotCreateFile = false,
+                    tristateUseDefault = -2,
+                    read = function(path) {
+                        // http://msdn.microsoft.com/en-us/library/314cz14s.aspx
+                        var textStream = fileSystem.OpenTextFile(path, forReading, doNotCreateFile, tristateUseDefault),
+                            content = textStream.ReadAll().replace(/^\xef\xbb\xbf/, ""); // Remove BOM.
+                        textStream.Close();
+                        return content;
+                    },
+                    write = function(path, content) {
+                        var textStream = fileSystem.OpenTextFile(path, forWriting, createFile, tristateUseDefault);
+                        textStream.Write(content);
+                        textStream.Close();
+                    },
+                    request = function(url, verb, headers, body, readyStateChange) {
+                        var xmlHTTP = new ActiveXObject("Microsoft.XMLHTTP"),
+                            key;
+                        xmlHTTP.open(verb, url, false);
+                        for (key in headers) {
+                            if (headers.hasOwnProperty(key)) {
+                                xmlHTTP.setRequestHeader(key, headers[key]);
+                            }
+                        }
+                        xmlHTTP.onreadystatechange = function() {
+                            readyStateChange(xmlHTTP);
+                        };
+                        xmlHTTP.send(body);
+                    },
+                    minify = function(code, done, fail) {
+                        request(minifier, "POST", {
+                            "Content-type": "application/x-www-form-urlencoded"
+                        }, "js_code=" + encodeURIComponent(code), function(xmlHTTP) {
+                            if (xmlHTTP.readyState === 4) {
+                                if (xmlHTTP.status === 200) {
+                                    done(xmlHTTP.responseText);
+                                } else {
+                                    fail(xmlHTTP.responseText);
+                                }
+                            }
+                        })
+                    };
+
+                try {
+                    // Read file list.
+                    log("Reading JavaScript files list from '" + list + "'.");
+                    list = read(list).replace(/^\s+|\s+$/g, "").split("\n");
+                    log("Reading " + list.length + " JavaScript files.");
+
+                    // Read files.
+                    for (index = 0; index < list.length; index++) {
+                        list[index] = sourceFolder + list[index].replace(/^.*path=\"(.*)\".*$/, "$1");
+                        log("Reading '" + list[index] + "'.");
+                        list[index] = read(list[index]).replace(/\s+$/g, "");
+                        log("Read " + list[index].length + " characters.");
+                    }
+
+                    // Write jsMVC.js.
+                    list = list.join("\r\n\r\n") + "\r\n";
+                    log("Writing '" + buildFile + "'.");
+                    write(buildFile, list);
+                    log("Wrote " + list.length + " characters.");
+
+                    // Minify and write jsMVC.min.js.
+                    log("Minifying '" + buildFile + "' with '" + minifier + "'.");
+                    minify(list, function(code) {
+                        log("Minified '" + buildFile + "'.");
+                        log("Writing '" + minFile + "'.");
+                        write(minFile, code);
+                        log("Wrote " + code.length + " characters.");
+                    }, function(error) {
+                        log("Failed to minify '" + buildFile + "': " + error);
+                    });
+                }
+                catch (error) {
+                    log(error.number + ": " + error.description);
+                    throw error;
+                }
+            }());
+        </script>
+    </job>
+</package>
