@@ -53,6 +53,7 @@
     <Content Include="build\jsMVC.js" />
     <Content Include="build\jsMVC.min.js" />
     <None Include="build\make" />
+    <Content Include="mit.txt" />
     <Content Include="run\browser.build.htm" />
     <Content Include="run\node.server.js" />
     <Content Include="run\node.test.js" />

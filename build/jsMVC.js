@@ -4,7 +4,7 @@
 // v0.8 preview
 // Jan 14 2013 GMT-08
 //
-// Copyright 2013 Dixin http://weblogs.asp.net/dixin
+// Copyright (C) 2013 Dixin Yan http://weblogs.asp.net/dixin
 // Released under the MIT license
 
 (function(browser, node, undefined) {
