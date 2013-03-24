@@ -5,8 +5,8 @@
 *.pydevproject
 .project
 .metadata
-bin/
-tmp/
+#bin/
+#tmp/
 *.tmp
 *.bak
 *.swp
@@ -140,7 +140,7 @@ dist
 #build
 eggs
 parts
-bin
+#bin
 var
 sdist
 develop-eggs
