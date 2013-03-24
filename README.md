@@ -1,6 +1,6 @@
-jsMVC
-=====
+Welcome to jsMVC
+================
 
-jsMVC JavaScript library implements routing and MVC for browser (single page application) and server side (nodejs) development.
+[jsMVC](http://jsMVC.net) JavaScript library implements routing and MVC for browser (single page application) and server side (nodejs) development.
 
-Please use https://github.com/Dixin/jsMVC/blob/development/build/jsMVC.min.js  or https://github.com/Dixin/jsMVC/blob/development/build/jsMVC.js to start.
+Please use [jsMVC.min.js](https://raw.github.com/Dixin/jsMVC/development/build/jsMVC.min.js "jsMVC.min.js") or [jsMVC.js](https://raw.github.com/Dixin/jsMVC/development/build/jsMVC.js "jsMVC.js") to start.
