@@ -1,0 +1,12 @@
+﻿/// <reference path="jsMVC.js"/>
+/// <reference path="jsMVC._.js"/>
+/// <reference path="jsMVC.event.js"/>
+/// <reference path="jsMVC.routing.js"/>
+/// <reference path="jsMVC.routing.browser.js"/>
+/// <reference path="jsMVC.routing.node.js"/>
+/// <reference path="jsMVC.controller.js"/>
+/// <reference path="jsMVC.controller.browser.js"/>
+/// <reference path="jsMVC.controller.node.js"/>
+/// <reference path="jsMVC.observable.js"/>
+/// <reference path="jsMVC.bind.browser.js"/>
+/// <reference path="jsMVC.ready.js"/>

@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>jsMVC.net</title>
+    <script src="../build/jsMVC.min.js" type="text/javascript"></script>
+</head>
+<body>
+    <input type="text" data-bind="value: textValue" data-bindback="value: textValue" />
+    <input type="password" data-bind="value: textValue" data-bindback="value: textValue" />
+    <input type="button" data-bind="value: buttonText; click: buttonClick" />
+    <div data-bind="textContent: textValue"></div>
+
+    <script type="text/javascript">
+        var data = jsMVC.Observable({
+            textValue: "",
+            buttonText: "The button text",
+            buttonClick: function() {
+                data.set("textValue", "reset");
+            }
+        });
+
+        jsMVC.bind(document.body, data);
+    </script>
+</body>
+</html>

@@ -1,0 +1,545 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{856D14A9-89A7-4163-9257-8FC24650D3E8}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>JSMvc</RootNamespace>
+    <AssemblyName>JSMvc</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <JSLintSkip>
+    </JSLintSkip>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>temporary\jsMVC\bin\</OutputPath>
+    <BaseIntermediateOutputPath>temporary\jsMVC\obj\</BaseIntermediateOutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <CodeAnalysisRuleSet>tools\AllRules.ruleset</CodeAnalysisRuleSet>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>temporary\jsMVC\bin\</OutputPath>
+    <BaseIntermediateOutputPath>temporary\jsMVC\obj\</BaseIntermediateOutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="build\build.node.js" />
+    <Content Include="build\jsMVC.js" />
+    <Content Include="build\jsMVC.min.js" />
+    <None Include="build\make" />
+    <Content Include="run\browser.build.htm" />
+    <Content Include="run\node.server.js" />
+    <Content Include="run\node.test.js" />
+    <Content Include="samples\mvc.basic.htm" />
+    <Content Include="source\jsMVC.bind.browser.js" />
+    <Content Include="source\jsMVC.controller.js" />
+    <Content Include="source\jsMVC.debug.js" />
+    <Content Include="source\jsMVC.event.js" />
+    <Content Include="source\jsMVC.ready.js" />
+    <Content Include="source\jsMVC.routing.browser.js" />
+    <Content Include="source\jsMVC.routing.js" />
+    <Content Include="source\jsMVC.routing.node.js" />
+    <Content Include="source\jsMVC._.js" />
+    <Content Include="source\jsMVC.observable.js" />
+    <Content Include="source\jsMVC.js" />
+    <Content Include="source\_references.js" />
+    <Content Include="samples\bind.twoWay.htm" />
+    <Content Include="run\browser.source.htm" />
+    <Content Include="run\browser.min.htm" />
+    <Content Include="source\jsMVC.controller.browser.js" />
+    <Content Include="source\jsMVC.controller.node.js" />
+    <Content Include="tests\jsMVC.bind.browser.tests.js" />
+    <Content Include="tests\jsMVC.controller.browser.tests.js" />
+    <Content Include="tests\jsMVC.controller.node.tests.js" />
+    <Content Include="tests\jsMVC.controller.tests.js" />
+    <Content Include="tests\jsMVC.event.tests.js" />
+    <Content Include="tests\jsMVC.ready.tests.js" />
+    <Content Include="tests\jsMVC.routing.browser.tests.js" />
+    <Content Include="tests\jsMVC.routing.node.tests.js" />
+    <Content Include="tests\jsMVC.routing.tests.js" />
+    <Content Include="tests\jsMVC.tests.js" />
+    <Content Include="tests\jsMVC._.tests.js" />
+    <Content Include="run\node.build.js" />
+    <Content Include="run\node.min.js" />
+    <Content Include="tools\AllRules.ruleset" />
+    <Content Include="tests\Data.bind.tests.memory.js" />
+    <Content Include="tests\jsMVC.observable.tests.js" />
+    <Content Include="tests\Data.bind.tests.memory.htm" />
+    <Content Include="build\build.windows.wsf" />
+    <Content Include="build\jsMVC.min.js.map" />
+    <Content Include="run\node.config.js" />
+    <Content Include="run\node.debug.cmd" />
+    <Content Include="build\make.cmd" />
+    <None Include="tools\jquery-1.9.1.intellisense.js" />
+    <Content Include="tools\jquery-1.9.1.js" />
+    <Content Include="tools\jsLint.xml" />
+    <Content Include="tools\node_modules\jquery-deferred\index.js" />
+    <Content Include="tools\node_modules\jquery-deferred\lib\jquery-callbacks.js" />
+    <Content Include="tools\node_modules\jquery-deferred\lib\jquery-core.js" />
+    <Content Include="tools\node_modules\jquery-deferred\lib\jquery-deferred.js" />
+    <Content Include="tools\node_modules\qunit\bin\cli.js" />
+    <Content Include="tools\node_modules\qunit\index.js" />
+    <Content Include="tools\node_modules\qunit\lib\child.js" />
+    <Content Include="tools\node_modules\qunit\lib\coverage.js" />
+    <Content Include="tools\node_modules\qunit\lib\log.js" />
+    <Content Include="tools\node_modules\qunit\lib\testrunner.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\argsparser\index.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\argsparser\lib\argsparser.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\argsparser\test\test.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\example\prof.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\example\tiny.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\example\top\run.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\example\top\src.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\index.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\example\microwave.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\example\web\bs.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\example\web\index.html" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\example\web\main.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\example\web\server.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\example\wrap.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\index.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\examples\json.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\examples\leaves.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\examples\negative.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\examples\scrub.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\examples\stringify.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\index.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\main.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\circular.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\date.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\equal.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\instance.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\interface.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\json.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\keys.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\leaves.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\lib\deep_equal.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\mutability.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\negative.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\obj.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\siblings.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\stop.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\stringify.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\subexpr.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\test\super_deep.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\docstyle.css" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\lib\object-ast.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\lib\parse-js.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\lib\process.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\lib\squeeze-more.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\README.html" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\beautify.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\testparser.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\array1.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\array2.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\array3.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\array4.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\assignment.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\concatstring.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\const.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\empty-blocks.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\forstatement.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\if.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\ifreturn.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\ifreturn2.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue10.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue11.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue13.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue14.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue16.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue17.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue20.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue21.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue25.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue27.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue28.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue29.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue30.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue34.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue4.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue48.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue50.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue53.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue54.1.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue68.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue69.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\issue9.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\mangle.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\null_string.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\strict-equals.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\var.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\whitespace.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\expected\with.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\array1.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\array2.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\array3.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\array4.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\assignment.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\concatstring.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\const.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\empty-blocks.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\forstatement.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\if.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\ifreturn.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\ifreturn2.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue10.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue11.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue13.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue14.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue16.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue17.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue20.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue21.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue25.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue27.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue28.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue29.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue30.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue34.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue4.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue48.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue50.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue53.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue54.1.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue68.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue69.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\issue9.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\mangle.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\null_string.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\strict-equals.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\var.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\whitespace.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\compress\test\with.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\test\unit\scripts.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\tmp\hoist.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\tmp\instrument.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\tmp\instrument2.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\tmp\test.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\uglify-js.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\test\ast.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\test\err.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\test\fail.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\test\fail\src.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\test\label.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\test\microwave.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\test\parent.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\test\wrap.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\test\cover.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\test\return.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\test\src\cover.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\examples\revs.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\examples\table.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\index.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\lib\cli-table\index.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\lib\cli-table\utils.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\node_modules\colors\colors.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\node_modules\colors\example.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\node_modules\colors\MIT-LICENSE.txt" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\test\common.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\test\index.test.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\tracejs\test\fixture\example.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\tracejs\test\test.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\tracejs\trace.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\underscore\favicon.ico" />
+    <Content Include="tools\node_modules\qunit\node_modules\underscore\index.html" />
+    <Content Include="tools\node_modules\qunit\node_modules\underscore\index.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\underscore\underscore-min.js" />
+    <Content Include="tools\node_modules\qunit\node_modules\underscore\underscore.js" />
+    <Content Include="tools\node_modules\qunit\support\json\cycle.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\canvas\canvas-test.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\canvas\canvas.html" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\canvas\qunit-canvas.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\close-enough\close-enough-test.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\close-enough\close-enough.html" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\close-enough\qunit-close-enough.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\composite\composite-demo-test.html" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\composite\index.html" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\composite\qunit-composite.css" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\composite\qunit-composite.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\junitlogger\index.html" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\junitlogger\junitlogger.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\phantomjs\runner.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\step\qunit-step.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\step\step-test.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\step\step.html" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\themes\gabe.css" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\themes\gabe.html" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\themes\nv.css" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\themes\nv.html" />
+    <Content Include="tools\node_modules\qunit\support\qunit\AUTHORS.txt" />
+    <Content Include="tools\node_modules\qunit\support\qunit\grunt.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\qunit\qunit.css" />
+    <Content Include="tools\node_modules\qunit\support\qunit\qunit\qunit.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\test\deepEqual.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\test\headless.html" />
+    <Content Include="tools\node_modules\qunit\support\qunit\test\index.html" />
+    <Content Include="tools\node_modules\qunit\support\qunit\test\logs.html" />
+    <Content Include="tools\node_modules\qunit\support\qunit\test\logs.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\test\narwhal-test.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\test\node-test.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\test\swarminject.js" />
+    <Content Include="tools\node_modules\qunit\support\qunit\test\test.js" />
+    <Content Include="tools\node_modules\qunit\test\fixtures\async-code.js" />
+    <Content Include="tools\node_modules\qunit\test\fixtures\async-test.js" />
+    <Content Include="tools\node_modules\qunit\test\fixtures\child-code-global.js" />
+    <Content Include="tools\node_modules\qunit\test\fixtures\child-code-namespace.js" />
+    <Content Include="tools\node_modules\qunit\test\fixtures\child-tests-global.js" />
+    <Content Include="tools\node_modules\qunit\test\fixtures\child-tests-namespace.js" />
+    <Content Include="tools\node_modules\qunit\test\fixtures\testrunner-code.js" />
+    <Content Include="tools\node_modules\qunit\test\fixtures\testrunner-tests.js" />
+    <Content Include="tools\node_modules\qunit\test\fixtures\uncaught-exception-code.js" />
+    <Content Include="tools\node_modules\qunit\test\fixtures\uncaught-exception-test.js" />
+    <Content Include="tools\node_modules\qunit\test\testrunner.js" />
+    <Content Include="tools\node_modules\uglify-js\lib\ast.js" />
+    <Content Include="tools\node_modules\uglify-js\lib\compress.js" />
+    <Content Include="tools\node_modules\uglify-js\lib\mozilla-ast.js" />
+    <Content Include="tools\node_modules\uglify-js\lib\output.js" />
+    <Content Include="tools\node_modules\uglify-js\lib\parse.js" />
+    <Content Include="tools\node_modules\uglify-js\lib\scope.js" />
+    <Content Include="tools\node_modules\uglify-js\lib\sourcemap.js" />
+    <Content Include="tools\node_modules\uglify-js\lib\transform.js" />
+    <Content Include="tools\node_modules\uglify-js\lib\utils.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\bool.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\boolean_double.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\boolean_single.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\default_hash.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\default_singles.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\divide.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\line_count.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\line_count_options.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\line_count_wrap.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\nonopt.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\reflect.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\short.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\string.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\usage-options.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\example\xup.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\index.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\node_modules\wordwrap\example\center.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\node_modules\wordwrap\example\meat.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\node_modules\wordwrap\index.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\node_modules\wordwrap\test\break.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\node_modules\wordwrap\test\idleness.txt" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\node_modules\wordwrap\test\wrap.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\test\parse.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\test\usage.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\test\_.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\test\_\argv.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\test\_\bin.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\x.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\build\assert-shim.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\build\mini-require.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\build\suffix-browser.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\build\test-prefix.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\build\test-suffix.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\lib\source-map.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\lib\source-map\array-set.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\lib\source-map\base64-vlq.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\lib\source-map\base64.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\lib\source-map\binary-search.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\lib\source-map\source-map-consumer.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\lib\source-map\source-map-generator.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\lib\source-map\source-node.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\lib\source-map\util.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\Makefile.dryice.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\node_modules\amdefine\amdefine.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\test\run-tests.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\test\source-map\test-api.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\test\source-map\test-array-set.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\test\source-map\test-base64-vlq.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\test\source-map\test-base64.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\test\source-map\test-binary-search.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\test\source-map\test-dog-fooding.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\test\source-map\test-source-map-consumer.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\test\source-map\test-source-map-generator.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\test\source-map\test-source-node.js" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\test\source-map\util.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\arrays.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\blocks.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\conditionals.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\dead-code.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\debugger.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\drop-unused.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\issue-105.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\issue-12.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\issue-22.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\issue-44.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\issue-59.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\labels.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\loops.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\properties.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\sequences.js" />
+    <Content Include="tools\node_modules\uglify-js\test\compress\switch.js" />
+    <Content Include="tools\node_modules\uglify-js\test\run-tests.js" />
+    <Content Include="tools\node_modules\uglify-js\tools\node.js" />
+    <Content Include="tools\qunit-1.11.0.css" />
+    <Content Include="tools\qunit-1.11.0.js" />
+    <Content Include="tools\VisualStudio2012.vssettings" />
+    <Content Include="tools\_references.js" />
+    <Content Include="Web.config" />
+    <Content Include="tools\Settings.StyleCop" />
+    <Content Include="tools\node_modules\.bin\qunit" />
+    <Content Include="tools\node_modules\.bin\qunit.cmd" />
+    <Content Include="tools\node_modules\qunit\.gitmodules" />
+    <Content Include="tools\node_modules\qunit\.npmignore" />
+    <Content Include="tools\node_modules\qunit\Makefile" />
+    <Content Include="tools\node_modules\qunit\node_modules\argsparser\.npmignore" />
+    <Content Include="tools\node_modules\qunit\node_modules\argsparser\Makefile" />
+    <Content Include="tools\node_modules\qunit\node_modules\argsparser\package.json" />
+    <Content Include="tools\node_modules\qunit\node_modules\argsparser\readme.md" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\.npmignore" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\.travis.yml" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\.npmignore" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\.travis.yml" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\.bin\uglifyjs" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\.bin\uglifyjs.cmd" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\.npmignore" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\LICENSE" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\package.json" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\traverse\README.markdown" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\.npmignore" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\bin\uglifyjs" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\package.json" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\package.json~" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\node_modules\uglify-js\README.org" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\package.json" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\node_modules\burrito\README.markdown" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\package.json" />
+    <Content Include="tools\node_modules\qunit\node_modules\bunker\README.markdown" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\.npmignore" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\History.md" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\Makefile" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\node_modules\colors\package.json" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\node_modules\colors\ReadMe.md" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\package.json" />
+    <Content Include="tools\node_modules\qunit\node_modules\cli-table\README.md" />
+    <Content Include="tools\node_modules\qunit\node_modules\tracejs\package.json" />
+    <Content Include="tools\node_modules\qunit\node_modules\tracejs\README.md" />
+    <Content Include="tools\node_modules\qunit\node_modules\underscore\.npmignore" />
+    <Content Include="tools\node_modules\qunit\node_modules\underscore\CNAME" />
+    <Content Include="tools\node_modules\qunit\node_modules\underscore\LICENSE" />
+    <Content Include="tools\node_modules\qunit\node_modules\underscore\package.json" />
+    <Content Include="tools\node_modules\qunit\node_modules\underscore\raw\underscore.psd" />
+    <Content Include="tools\node_modules\qunit\node_modules\underscore\README.md" />
+    <Content Include="tools\node_modules\qunit\package.json" />
+    <Content Include="tools\node_modules\qunit\readme.md" />
+    <Content Include="tools\node_modules\qunit\support\qunit\.npmignore" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\canvas\README.md" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\close-enough\README.md" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\composite\README.md" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\phantomjs\README.md" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\step\README.md" />
+    <Content Include="tools\node_modules\qunit\support\qunit\addons\themes\README.md" />
+    <Content Include="tools\node_modules\qunit\support\qunit\History.md" />
+    <Content Include="tools\node_modules\qunit\support\qunit\package.json" />
+    <Content Include="tools\node_modules\qunit\support\qunit\README.md" />
+    <Content Include="tools\node_modules\.bin\uglifyjs" />
+    <Content Include="tools\node_modules\.bin\uglifyjs.cmd" />
+    <Content Include="tools\node_modules\uglify-js\.npmignore" />
+    <Content Include="tools\node_modules\uglify-js\bin\uglifyjs" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\.travis.yml" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\LICENSE" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\node_modules\wordwrap\.npmignore" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\node_modules\wordwrap\package.json" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\node_modules\wordwrap\README.markdown" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\package.json" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\optimist\README.markdown" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\.npmignore" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\build\prefix-source-map.jsm" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\build\prefix-utils.jsm" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\build\suffix-source-map.jsm" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\build\suffix-utils.jsm" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\LICENSE" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\node_modules\amdefine\.npmignore" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\node_modules\amdefine\LICENSE" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\node_modules\amdefine\package.json" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\node_modules\amdefine\README.md" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\package.json" />
+    <Content Include="tools\node_modules\uglify-js\node_modules\source-map\README.md" />
+    <Content Include="tools\node_modules\uglify-js\package.json" />
+    <Content Include="tools\node_modules\uglify-js\README.md" />
+    <Content Include="tools\node_modules\jquery-deferred\.npmignore" />
+    <Content Include="tools\node_modules\jquery-deferred\History.md" />
+    <Content Include="tools\node_modules\jquery-deferred\Makefile" />
+    <Content Include="tools\node_modules\jquery-deferred\package.json" />
+    <Content Include="tools\node_modules\jquery-deferred\Readme.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="tools\Resharper.DotSettings" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="temporary\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>47095</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:47096/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

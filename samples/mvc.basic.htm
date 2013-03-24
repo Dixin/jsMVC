@@ -1,0 +1,166 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>jsMVC.net</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="../build/jsMVC.js" type="text/javascript"></script>
+    <script src="../tools/jquery-1.9.1.js" type="text/javascript"></script>
+    <style type="text/css">
+        .app {
+            position: absolute;
+            left: 0px;
+            right: 0px;
+            top: 0px;
+            bottom: 0px;
+        }
+
+        .app-header {
+            position: absolute;
+            left: 0px;
+            right: 0px;
+            top: 0px;
+            height: 100px;
+            background: #EEEEEE;
+        }
+
+        .app-aside {
+            position: absolute;
+            left: 0px;
+            width: 300px;
+            top: 100px;
+            bottom: 0px;
+            background: #EEEEBB;
+        }
+
+        .app-article {
+            position: absolute;
+            left: 300px;
+            right: 0px;
+            top: 100px;
+            bottom: 0px;
+        }
+
+        .app-template {
+            display: none;
+        }
+    </style>
+    <script type="text/javascript">
+        (function(global, jsMVC, undefined) {
+            
+            jsMVC.Route({
+                id: "default",
+                url: "{controller}/{action}/{*id}",
+                defaults: {
+                    controller: "home", // "" -> "home" -> "home/index" 
+                    action: "index", // "home" -> "home/index"
+                    id: undefined
+                }
+            });
+
+            jsMVC.event.view = function(event, parts) {
+                $("#navigation").empty().html(parts.navigation);
+                $("#article").empty().html(parts.article);
+            };
+
+            jsMVC.event.error = function(event, status) {
+                throw new Error(status);
+            };
+
+            jsMVC.Controller({
+                id: "home",
+                actions: {
+                    index: function(event) {
+                        event.view(event, {
+                            navigation: "Home",
+                            article: "This is the list of products."
+                        });
+                    }
+                }
+            });
+
+            jsMVC.Controller({
+                id: "product",
+                actions: {
+                    index: function(event) {
+                        event.getAction("list").execute(event);
+                    },
+                    list: function(event) {
+                        event.view(event, {
+                            navigation: "Home > Products",
+                            article: "This is the list of products."
+                        });
+                    },
+
+                    item: function(event) { // {controller}/{action}/{id} <-> product/item/4
+                        var id = parseInt(event.routeData.values.id);
+                        if (isNaN(id) || id < 0 || id > 5) {
+                            event.error(event, jsMVC.status.notFound);
+                        } else {
+                            event.view(event, {
+                                navigation: "Home > Products > Product " + id + ".",
+                                article: "This is the page of product " + id + "."
+                            });
+                        }
+                    }
+                }
+            });
+
+            jsMVC.Controller({
+                id: "user",
+                actions: {
+                    logOn: function(event) {
+                        event.view(event, {
+                            navigation: "Home > Log On",
+                            article: "This is the log on page."
+                        });
+                    }
+                }
+            });
+
+            jsMVC.Filter({
+                error: function(event) {
+                    var message;
+                    if (event.status === 404 || parseInt(event.message) === 404) {
+                        message = "The requested page is not found:(";
+                    } else {
+                        message = "The request cannot be processed:(";
+                    }
+                    event.view(event, {
+                        navigation: "Home > Error",
+                        article: message
+                    });
+                }
+            });
+
+            $(jsMVC.ready);
+
+        })(this, this.jsMVC);
+
+    </script>
+</head>
+<body>
+    <div class="app">
+        <div class="app-header">
+            <p id="navigation">
+            </p>
+        </div>
+        <div class="app-aside">
+            <ul>
+                <li><a href="#!home/index">Navigation home/index</a></li>
+                <li><a href="#!product">Navigation: product</a></li>
+                <li><a href="#!product/list">Navigation: product/list</a></li>
+                <li><a href="#!product/item/4">Navigation: product/item/4</a></li>
+                <li><a href="#!product/item/5">Navigation: product/item/5</a></li>
+                <li><a href="#!user/logon">Navigation: user/logon</a></li>
+                <li><a href="#!product/item/98">Navigation: product/item/98</a></li>
+            </ul>
+        </div>
+        <div class="app-article" id="article">
+        </div>
+    </div>
+    <div class="app-template">
+        <div id="home/index">
+        </div>
+    </div>
+</body>
+</html>
