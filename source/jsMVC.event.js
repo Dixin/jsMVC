@@ -9,6 +9,12 @@
         error = _.error,
         forEachItem = _.forEachArrayItem,
         isFunction = _.isFunction,
+        returnTrue = function() {
+            return true;
+        },
+        returnFalse = function() {
+            return false;
+        },
         Callbacks = (function() {
             var constructor = function() {
                 this.callbacks = [];
@@ -78,7 +84,15 @@
                 this.timeStamp = Date.now();
             };
             constructor.prototype = {
-                constructor: constructor
+                constructor: constructor,
+                isDefaultPrevented: returnFalse,
+                isPropagationStopped: returnFalse,
+                preventDefault: function() {
+                    this.isDefaultPrevented = returnTrue;
+                },
+                stopPropagation: function() {
+                    this.isPropagationStopped = returnTrue;
+                }
             };
             return constructor;
         }());

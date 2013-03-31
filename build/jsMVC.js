@@ -314,6 +314,12 @@
         error = _.error,
         forEachItem = _.forEachArrayItem,
         isFunction = _.isFunction,
+        returnTrue = function() {
+            return true;
+        },
+        returnFalse = function() {
+            return false;
+        },
         Callbacks = (function() {
             var constructor = function() {
                 this.callbacks = [];
@@ -383,7 +389,15 @@
                 this.timeStamp = Date.now();
             };
             constructor.prototype = {
-                constructor: constructor
+                constructor: constructor,
+                isDefaultPrevented: returnFalse,
+                isPropagationStopped: returnFalse,
+                preventDefault: function() {
+                    this.isDefaultPrevented = returnTrue;
+                },
+                stopPropagation: function() {
+                    this.isPropagationStopped = returnTrue;
+                }
             };
             return constructor;
         }());
@@ -1620,10 +1634,13 @@
                 virtualPath: virtualPath,
                 routeData: routeTable.getRouteData(virtualPath),
                 
-                newURL: options.newURL || currentHref,
-                oldURL: options.oldURL || previousHref,
+                newHref: options.newURL || currentHref,
+                oldHref: options.oldURL || previousHref,
                 newHash: newHash,
-                oldHash: options.oldHash || getHash(previousHref)
+                oldHash: options.oldHash || getHash(previousHref),
+                
+                request: undefined,
+                response: undefined
             }, true);
             previousHref = currentHref;
             return event;
@@ -1787,25 +1804,61 @@
         domain = node("domain"),
         prefix = "/",
         prefixLength = prefix.length,
+        server,
         normalizeEvent = function(options) {
             var event = new Event(),
                 request,
-                virtualPath;
+                requestMethod,
+                virtualPath,
+                requestedUrl,
+                referrerUrl,
+                address;
             options = options || {};
             request = options.request;
-            virtualPath = options.virtualPath;
-            if (virtualPath === undefined) {
-                virtualPath = request ? url.parse(request.url).pathname : null;
-                if (virtualPath && virtualPath.substr(0, prefixLength) === prefix) {
-                    virtualPath = virtualPath.substr(prefixLength); // Remove starting "/"
+
+            if (request) { // Get info from request.
+                requestMethod = request.method;
+
+                requestedUrl = url.parse(request.url);
+                requestedUrl.protocol = request.connection.encrypted ? "https" : "http";
+                requestedUrl.host = request.headers.host;
+
+                referrerUrl = request.headers['referer'] || request.headers['Referer'];
+            } else { // Get info from options.
+                // If options.url is provided, use options.url and ignore options.virtualPath.
+                requestMethod = options.type;
+                requestedUrl = options.newHref || options.virtualPath;
+                requestedUrl = url.parse(requestedUrl);
+                if (server) {
+                    address = server.address();
+                    if (address) {
+                        requestedUrl.hostname = address.address === "0.0.0.0" ? "localhost" : address.address;
+                        requestedUrl.port = address.port;
+                    }
                 }
+
+                referrerUrl = options.oldHref;
             }
+
+            referrerUrl = referrerUrl !== undefined ? url.parse(referrerUrl) : {};
+            
+            virtualPath = requestedUrl.pathname;
+            if (virtualPath && virtualPath.substr(0, prefixLength) === prefix) {
+                virtualPath = virtualPath.substr(prefixLength); // Remove starting "/".
+            }
+
             return copyProps(event, {
-                type: request ? request.method : options.type,
-                target: options.server,
-                currentTarget: options.server,
+                type: requestMethod,
+                // timeStamp is already in event.
+                target: options.server || null,
+                currentTarget: options.server || null,
                 virtualPath: virtualPath,
                 routeData: virtualPath ? routeTable.getRouteData(virtualPath) : null,
+
+                newHref: url.format(requestedUrl),
+                oldHref: referrerUrl.href,
+                newHash: requestedUrl.hash,
+                oldHash: referrerUrl.hash,
 
                 request: request,
                 response: options.response
@@ -1814,7 +1867,7 @@
         listen = function(callback) {
             var serverDomain = domain.create();
             serverDomain.run(function() {
-                var server = http.createServer().on("request", function(request, response) {
+                server = http.createServer().on("request", function(request, response) {
                     var requestDomian = domain.create(),
                         event = normalizeEvent({
                             request: request,
@@ -1845,13 +1898,13 @@
             });
         };
 
-    jsMVC.go = function(destination, options, filter) {
+    jsMVC.go = function(destination, options) {
         var virtualPathData;
         options = options || {};
         switch (type(destination)) {
             case "string":
                 trigger("request", normalizeEvent({
-                    virtualPath: destination
+                    newHref: destination
                 }));
                 return true;
             case "object":

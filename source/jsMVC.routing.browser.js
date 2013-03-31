@@ -71,10 +71,13 @@
                 virtualPath: virtualPath,
                 routeData: routeTable.getRouteData(virtualPath),
                 
-                newURL: options.newURL || currentHref,
-                oldURL: options.oldURL || previousHref,
+                newHref: options.newURL || currentHref,
+                oldHref: options.oldURL || previousHref,
                 newHash: newHash,
-                oldHash: options.oldHash || getHash(previousHref)
+                oldHash: options.oldHash || getHash(previousHref),
+                
+                request: undefined,
+                response: undefined
             }, true);
             previousHref = currentHref;
             return event;
