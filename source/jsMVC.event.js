@@ -1,71 +1,24 @@
 ﻿/// <reference path="jsMVC.js"/>
 /// <reference path="jsMVC._.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     var nativeSilce = Array.prototype.slice,
         _ = jsMVC._,
-        error = _.error,
-        forEachItem = _.forEachArrayItem,
-        isFunction = _.isFunction,
-        returnTrue = function() {
-            return true;
-        },
-        returnFalse = function() {
-            return false;
-        },
-        Callbacks = (function() {
-            var constructor = function() {
-                this.callbacks = [];
-            };
-
-            constructor.prototype = {
-                constructor: constructor,
-
-                push: function(callback) {
-                    if (!isFunction(callback)) {
-                        error("'callback' must be function.");
-                    }
-                    return this.callbacks.push(callback);
-                },
-
-                execute: function() {
-                    var args = arguments;
-                    forEachItem(this.callbacks, function(callback) {
-                        callback.apply(undefined, args);
-                    });
-                },
-
-                remove: function(callback) {
-                    if (callback === undefined) {
-                        // Remove all items.
-                        this.callbacks = [];
-                    } else {
-                        forEachItem(this.callbacks, function(item, index, callbacks) {
-                            if (item === callback) {
-                                callbacks.splice(index, 1); // Remove item.
-                                return true; // break.
-                            }
-                            return false;
-                        });
-                    }
-                    return this.callbacks.length;
-                }
-            };
-
-            return constructor;
-        }()),
+        Functions = _.Functions,
+        returnTrue = _.returnTrue,
+        returnFalse = _.returnFalse,
         eventCallbacks = {},
-        on = function(eventType, callback) {
+        on = function (eventType, callback) {
             var callbacks = eventCallbacks[eventType];
             if (!callbacks) {
-                callbacks = eventCallbacks[eventType] = new Callbacks();
+                callbacks = eventCallbacks[eventType] = new Functions();
             }
             callbacks.push(callback);
             return jsMVC;
         },
-        off = function(eventType, callback) {
+        off = function (eventType, callback) {
             var callbacks = eventCallbacks[eventType];
             if (callbacks) {
                 if (callbacks.remove(callback) === 0) {
@@ -73,30 +26,41 @@
                 }
             }
         },
-        trigger = function(eventType) {
+        trigger = function (eventType) {
             var callbacks = eventCallbacks[eventType];
             if (callbacks) {
-                callbacks.execute.apply(callbacks, nativeSilce.call(arguments, 1));
+                callbacks.execute(callbacks, nativeSilce.call(arguments, 1));
             }
         },
-        Event = (function() {
-            var constructor = function() {
+        Event = (function () {
+            var constructor = function () {
                 this.timeStamp = Date.now();
+                this.result = undefined;
             };
             constructor.prototype = {
                 constructor: constructor,
                 isDefaultPrevented: returnFalse,
                 isPropagationStopped: returnFalse,
-                preventDefault: function() {
+                isImmediatePropagationStopped: returnFalse,
+                isErrorHandled: returnFalse,
+                preventDefault: function () {
                     this.isDefaultPrevented = returnTrue;
                 },
-                stopPropagation: function() {
+                stopPropagation: function () {
                     this.isPropagationStopped = returnTrue;
+                    this.isImmediatePropagationStopped = returnTrue;
+                },
+                stopImmediatePropagation: function () {
+                    this.isImmediatePropagationStopped = returnTrue;
+                },
+                handleError: function () {
+                    this.isErrorHandled = returnTrue;
                 }
             };
             return constructor;
         }());
 
+    // Exports.
     jsMVC.event = Event.prototype,
     jsMVC.on = on;
     jsMVC.off = off,

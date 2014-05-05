@@ -1,7 +1,7 @@
 ﻿/// <reference path="../source/_references.js"/>
 /// <reference path="../tools/_references.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     QUnit.module("jsMVC._");
@@ -9,7 +9,7 @@
     var _ = jsMVC._,
         type = _.type;
 
-    test("Can get type", function() {
+    test("Can get type", function () {
         strictEqual(type(NaN), "number");
         strictEqual(type(0), "number");
         strictEqual(type(0.0), "number");

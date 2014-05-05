@@ -1,7 +1,7 @@
 ﻿/// <reference path="../tools/_references.js"/>
 /// <reference path="../source/_references.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     if (!browser) {
@@ -11,27 +11,12 @@
 
     QUnit.module("jsMVC.bind.browser");
 
-    var noop = function() {
+    var noop = function () {
     },
-        delay = function(callback) {
-            return $.Deferred(function(deferred, time) {
-                time = time || 110;
-                browser.setTimeout(function() {
-                    callback();
-                    deferred.resolve();
-                }, time);
-            }).promise();
-        },
-        getDelay = function(callback) {
-            return delay(callback);
-        },
-        cleanUpHash = function() {
-            browser.location.hash = "";
-        },
         // http://darktalker.com/2010/manually-trigger-dom-event/
-        fireEvent = function(element, event) {
+        fireEvent = function (element, event) {
             var evt;
-            var isString = function(it) {
+            var isString = function (it) {
                 return typeof it == "string" || it instanceof String;
             };
             element = (isString(element)) ? document.getElementById(element) : element;
@@ -51,7 +36,7 @@
         dataBind = jsMVC.bind,
         dataUnbind = jsMVC.unbind;
 
-    test("Can bind element with observable object and can unbind", function() {
+    test("Can bind element with observable object and can unbind", function () {
         var $root = $('<div data-bind="textContent:fullName; style.marginLeft: marginLeft; click: click"></div>');
         var root = $root[0];
         var isClicked1 = false;
@@ -59,10 +44,10 @@
             firstName: "A",
             lastName: "B",
             marginLeft: "2px",
-            click: function() {
+            click: function () {
                 isClicked1 = true;
             }
-        }).add("fullName", function(firstName, lastName) {
+        }).add("fullName", function (firstName, lastName) {
             return firstName + " " + lastName;
         }, ["firstName", "lastName"]);
         dataBind(root, data);
@@ -79,7 +64,7 @@
         equal(root.style.marginLeft, "2px");
         isClicked1 = false;
         var isClicked2 = false;
-        data.set("click", function() {
+        data.set("click", function () {
             isClicked2 = true;
         });
         root.click();
@@ -99,7 +84,7 @@
         equal(root.innerHTML, "X B");
         equal(root.style.marginLeft, "10%");
         isClicked2 = false;
-        data.set("click", function() {
+        data.set("click", function () {
             isClicked1 = true;
             isClicked2 = true;
         });
@@ -115,14 +100,14 @@
         equal(root.style.marginLeft, "10%");
     });
 
-    test("Can bind element with object", function() {
+    test("Can bind element with object", function () {
         var $root = $('<div data-bind="textContent:fullName; style.marginLeft: marginLeft; click: click"></div>');
         var root = $root[0];
         var isClicked1 = false;
         var data = {
             fullName: "A B",
             marginLeft: "5px",
-            click: function() {
+            click: function () {
                 isClicked1 = true;
             }
         };
@@ -137,7 +122,7 @@
         data.fullName = "C D";
         isClicked1 = false;
         var isClicked2 = false;
-        data.click = function() {
+        data.click = function () {
             isClicked2 = true;
         };
         equal($root.text(), "A B");
@@ -164,7 +149,7 @@
         equal(root.style.marginLeft, "5px");
     });
 
-    test("Can bind element and children with observable and can unbind", function() {
+    test("Can bind element and children with observable and can unbind", function () {
         var $root = $('<form data-bind="style.marginLeft: marginLeft; action: action"><div><span data-bind="textContent: label"></span><input type="text" data-bind="value: value" /></div><div><input type="button" data-bind="value: button; click: click" /></div></form>');
         var root = $root[0];
         var isClicked1 = false;
@@ -173,10 +158,10 @@
             action: "http://jsmvc.net/",
             label: "Name",
             value: 123,
-            click: function() {
+            click: function () {
                 isClicked1 = true;
             }
-        }).add("button", function(label) {
+        }).add("button", function (label) {
             return "Submit " + label;
         }, ["label"]);
         dataBind(root, data);
@@ -196,7 +181,7 @@
         equal($root.find("input[type='button']").val(), "Submit 888");
         isClicked1 = false;
         var isClicked2 = false;
-        data.set("click", function() {
+        data.set("click", function () {
             isClicked2 = true;
         });
         $root.find("input[type='button']")[0].click();
@@ -211,7 +196,7 @@
         equal($root.find("span")[0].innerHTML, 888);
         equal($root.find("input[type='button']").val(), "Submit 888");
         isClicked2 = false;
-        data.set("click", function() {
+        data.set("click", function () {
             isClicked1 = true;
             isClicked2 = true;
         });
@@ -220,7 +205,7 @@
         equal(isClicked2, false);
     });
 
-    test("Can bind multiple elements and children with observable and can unbind", function() {
+    test("Can bind multiple elements and children with observable and can unbind", function () {
         var $root1 = $('<form data-bind="style.marginLeft: marginLeft; action: action"><div><span data-bind="textContent: label"></span><input type="text" data-bind="value: value" /></div><div><input type="button" data-bind="value: button" /></div></form>');
         var root1 = $root1[0];
         var $root2 = $('<p data-bind="style.marginLeft: marginLeft; textContent: label"></p><span data-bind="style.marginLeft: marginLeft; textContent: button"></span>');
@@ -230,7 +215,7 @@
             action: "http://jsmvc.net/",
             label: "Name",
             value: 123
-        }).add("button", function(label) {
+        }).add("button", function (label) {
             return "Submit " + label;
         }, ["label"]);
         dataBind(root1, data);
@@ -284,7 +269,7 @@
         equal($root2.eq(1).html(), "Submit 999");
     });
 
-    test("Can bind multiple elements and children with object and can unbind", function() {
+    test("Can bind multiple elements and children with object and can unbind", function () {
         var $root1 = $('<form data-bind="style.marginLeft: marginLeft; action: action"><div><span data-bind="textContent: label"></span><input type="text" data-bind="value: value" /></div><div><input type="button" data-bind="value: button" /></div></form>');
         var root1 = $root1[0];
         var $root2 = $('<p data-bind="style.marginLeft: marginLeft; textContent: label"></p><span data-bind="style.marginLeft: marginLeft; textContent: button"></span>');
@@ -345,7 +330,7 @@
         equal($root2.eq(1).html(), "Submit Name");
     });
 
-    test("Can bind element and children with observable hierarchy and can unbind", function() {
+    test("Can bind element and children with observable hierarchy and can unbind", function () {
         var $root = $('<div data-bind="style.marginLeft: marginLeft"> <div data-bind="textContent: person1.name"></div> <!--xx--><div data-bind="textContent: person2.name"></div></div>');
         var root = $root[0];
         var data = Observable({
@@ -425,7 +410,7 @@
         equal($root.find("div").eq(1).text(), "pp4");
     });
 
-    test("Can bind element and children with observable hierarchy and can remove and add binding", function() {
+    test("Can bind element and children with observable hierarchy and can remove and add binding", function () {
         var $root = $('<div data-bind="style.marginLeft: marginLeft"> <div data-bind="textContent: person1.name"></div> <!--xx--><div data-bind="textContent: person2.name"></div></div>');
         var root = $root[0];
         var data = Observable({
@@ -508,7 +493,7 @@
         equal($root.find("div").eq(1).text(), "pp6");
     });
 
-    test("Can bind element and each children with observable array and can unbind", function() {
+    test("Can bind element and each children with observable array and can unbind", function () {
         var $root = $('<ul data-bind="style.marginLeft: marginLeft" data-each="persons"><li data-bind="style.display: display; textContent: name"></li></ul>');
         var root = $root[0];
         var data = Observable({
@@ -598,7 +583,7 @@
         equal($root.children().eq(1).css("display"), "inline");
     });
 
-    test("Can bind element and each children with array and can unbind", function() {
+    test("Can bind element and each children with array and can unbind", function () {
         var $root = $('<ul data-bind="style.marginLeft: marginLeft" data-each="persons"><li data-bind="style.display: display; textContent: name"></li></ul>');
         var root = $root[0];
         var data = {
@@ -672,7 +657,7 @@
         equal($root.children().eq(1).css("display"), "none");
     });
 
-    test("Can bind element and children with observable array index and can unbind", function() {
+    test("Can bind element and children with observable array index and can unbind", function () {
         var $root = $('<ul data-bind="style.marginLeft: marginLeft"><li data-bind="style.display: persons[0].display; textContent: persons[0].name"></li><li data-bind="style.display: persons[1].display; textContent: persons[1].name"></li></ul>');
         var root = $root[0];
         var data = Observable({
@@ -732,7 +717,7 @@
         equal($root.children().eq(1).css("display"), "inline");
     });
 
-    test("Can bind element and children with array index and can unbind", function() {
+    test("Can bind element and children with array index and can unbind", function () {
         var $root = $('<ul data-bind="style.marginLeft: marginLeft"><li data-bind="style.display: persons[0].display; textContent: persons[0].name"></li><li data-bind="style.display: persons[1].display; textContent: persons[1].name"></li></ul>');
         var root = $root[0];
         var data = {
@@ -789,7 +774,7 @@
         equal($root.children().eq(1).css("display"), "none");
     });
 
-    test("Can nest each binding and can unbind", function() {
+    test("Can nest each binding and can unbind", function () {
         var $root = $('<ul data-bind="style.marginLeft: marginLeft" data-each="groups"><li><div data-bind="textContent: name"></div><ul data-each="persons"><li><p data-bind="textContent: name"></p><span data-bind="textContent: age"></span></li></ul></li></ul>');
         var root = $root[0];
         var data = Observable({
@@ -938,7 +923,7 @@
         equal($root.children("li").eq(1).children("ul").children("li").length, 1);
     });
 
-    test("Can bind with this key", function() {
+    test("Can bind with this key", function () {
         var $root = $('<div data-bind="textContent: this"></div>');
         var root = $root[0];
         var data = "abc";
@@ -978,13 +963,13 @@
         equal($root.children("li").eq(2).text(), "p2");
     });
 
-    test("Can bind form element property back to data and can unbind", function() {
+    test("Can bind form element property back to data and can unbind", function () {
         var $root = $('<div><input type="text" data-bind="value: textValue" data-bindback="value: textValue" /><input type="button" data-bind="value: buttonText; click: buttonClick" /><div data-bind="textContent: textValue"></div></div>');
         var root = $root[0];
         var data = Observable({
             textValue: "",
             buttonText: "The button text",
-            buttonClick: function() {
+            buttonClick: function () {
                 data.set("textValue", "reset");
             }
         });
@@ -1014,7 +999,7 @@
         }
     });
 
-    test("Can have converter", 0, function() {
+    test("Can have converter", 0, function () {
 
     });
 

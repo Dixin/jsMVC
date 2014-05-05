@@ -1,6 +1,6 @@
 ﻿/// <reference path="jsMVC.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     // Imports.
@@ -12,14 +12,13 @@
         nativeReduceRight = Array.prototype.reduceRight,
         nativeIndexOf = Array.prototype.indexOf,
         // Local variables.
-        noop = function() {
+        noop = function () {
         },
-        error = function(message) {
+        error = function (message) {
             throw new Error(message);
         },
-        
         // Array helpers.
-        forEachItem = function(array, callback, context) {
+        forEachItem = function (array, callback, context) {
             // Array.prototype.forEach cannot break.
             var index,
                 length;
@@ -29,16 +28,16 @@
             length = array.length;
             for (index = 0; index < length; index++) {
                 if (nativeHasOwn.call(array, index)) {
-                    if (callback.call(context, array[index], index, array)) {
+                    if (callback.call(context, array[index], index, array) === false) {
                         break;
                     }
                 }
             }
             return array;
         },
-        map = nativeMap ? function(array, callback, context) {
+        map = nativeMap ? function (array, callback, context) {
             return nativeMap.call(array, callback, context);
-        } : function(array, callback, context) {
+        } : function (array, callback, context) {
             var index,
                 results = new Array(array.length);
             for (index = 0; index < results.length; index++) {
@@ -48,9 +47,9 @@
             }
             return results;
         },
-        reduceRight = nativeReduceRight ? function(array, callback, initial) {
+        reduceRight = nativeReduceRight ? function (array, callback, initial) {
             return nativeReduceRight.call(array, callback, initial);
-        } : function(array, callback, initial) {
+        } : function (array, callback, initial) {
             var length = array.length,
                 hasInitial = arguments.length > 2,
                 accumulator,
@@ -66,9 +65,9 @@
             }
             return accumulator;
         },
-        some = nativeSome ? function(array, callback, context) {
+        some = nativeSome ? function (array, callback, context) {
             return nativeSome.call(array, callback, context);
-        } : function(array, callback, context) {
+        } : function (array, callback, context) {
             var index,
                 length = array.length;
             for (index = 0; index < length; index++) {
@@ -78,9 +77,9 @@
             }
             return false;
         },
-        indexOf = nativeIndexOf ? function(array, item) {
+        indexOf = nativeIndexOf ? function (array, item) {
             return nativeIndexOf.call(array, item);
-        } : function(array, item) {
+        } : function (array, item) {
             var index,
                 length = array.length;
             for (index = 0; index < length; index++) {
@@ -90,7 +89,7 @@
             }
             return -1;
         },
-        values = function(array, keys) {
+        values = function (array, keys) {
             var index,
                 length = keys.length,
                 results = new Array(length);
@@ -99,7 +98,6 @@
             }
             return results;
         },
-        
         // Object helpers.
         hasKeyIgnoredBug = !({
             toString: null
@@ -116,14 +114,14 @@
         ],
         ignoredKeysLength = hasKeyIgnoredBug.length, // IE6
 
-        forEachKey = nativeKeys ? function(object, callback, context) {
+        forEachKey = nativeKeys ? function (object, callback, context) {
             if (!object) {
                 return;
             }
-            forEachItem(nativeKeys(object), function(key) {
+            forEachItem(nativeKeys(object), function (key) {
                 return callback.call(context, key, object[key], object);
             });
-        } : (hasKeyIgnoredBug ? function(object, callback, context) { // IE6
+        } : (hasKeyIgnoredBug ? function (object, callback, context) { // IE6
             // https//developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys
             var key,
                 index;
@@ -132,32 +130,30 @@
             }
             for (key in object) {
                 if (nativeHasOwn.call(object, key)) {
-                    if (callback.call(context, key, object[key], object)) {
+                    if (callback.call(context, key, object[key], object) === false) {
                         break;
                     }
                 }
             }
             for (index = 0; index < ignoredKeysLength; index++) {
                 key = ignoredKeys[index];
-                if (nativeHasOwn.call(object, key) && callback.call(context, key, object[key], object)) {
+                if (nativeHasOwn.call(object, key) && callback.call(context, key, object[key], object) === false) {
                     break;
                 }
             }
-        } : function(object, callback, context) {
+        } : function (object, callback, context) {
             var key;
             if (!object) {
                 return;
             }
             for (key in object) {
-                if (nativeHasOwn.call(object, key)) {
-                    if (callback.call(context, key, object[key], object)) {
-                        break;
-                    }
+                if (nativeHasOwn.call(object, key) && callback.call(context, key, object[key], object) === false) {
+                    break;
                 }
             }
         }),
-        copyProps = function(destination, source, canOverride) {
-            forEachKey(source, function(key, value) {
+        copyProps = function (destination, source, canOverride) {
+            forEachKey(source, function (key, value) {
                 if (!canOverride && (key in destination)) {
                     error("Key '" + key + "' must be unique.");
                 }
@@ -165,7 +161,7 @@
             });
             return destination;
         },
-        countKeys = function(object) {
+        countKeys = function (object) {
             var count = 0,
                 key;
             for (key in object) {
@@ -175,13 +171,12 @@
             }
             return count;
         },
-        
         // Type helpers.
-        typeMap = reduceRight(["Boolean", "Number", "String", "Function", "Array", "Date", "RegExp", "Object"], function(accumulator, item) {
+        typeMap = reduceRight(["Boolean", "Number", "String", "Function", "Array", "Date", "RegExp", "Object"], function (accumulator, item) {
             accumulator["[object " + item + "]"] = item.toLowerCase();
             return accumulator;
         }, {}),
-        type = function(value) {
+        type = function (value) {
             switch (value) {
                 case null:
                     return "null";
@@ -193,39 +188,89 @@
                     return typeMap[nativeToString.call(value)] || "object";
             }
         },
-        isString = function(value) {
+        isString = function (value) {
             return type(value) === "string";
         },
-        isFunction = function(value) {
+        isFunction = function (value) {
             return type(value) === "function";
         },
-        isObject = function(value) {
+        isObject = function (value) {
             return type(value) === "object";
         },
-        isInteger = function(value) {
+        isInteger = function (value) {
             return !isNaN(parseInt(value, 10)) && isFinite(value);
         },
-        isArray = Array.isArray || function(value) {
+        isArray = Array.isArray || function (value) {
             return type(value) === "array";
         },
-        isNumber = function(value) {
+        isNumber = function (value) {
             return type(value) === "number";
         },
-        isWindow = function(value) {
+        isWindow = function (value) {
             return value && value === value.window;
+        },
+        // Function group.
+        Functions = (function () {
+            var constructor = function () {
+                this.fns = [];
+            };
+
+            constructor.prototype = {
+                constructor: constructor,
+
+                push: function (fn) {
+                    if (!isFunction(fn)) {
+                        error("'callback' must be function.");
+                    }
+                    return this.fns.push(fn);
+                },
+
+                execute: function (context, args) {
+                    var isExecuted = false;
+                    forEachItem(this.fns, function (callback) {
+                        callback.apply(context, args); // Should not return.
+                        isExecuted = true;
+                    });
+                    return isExecuted;
+                },
+
+                remove: function (fn) {
+                    if (fn === undefined) {
+                        // Remove all items.
+                        this.fns = [];
+                    } else {
+                        forEachItem(this.fns, function (item, index, fns) {
+                            if (item === fn) {
+                                fns.splice(index, 1); // Remove item.
+                                return false; // break.
+                            }
+                            return true;
+                        });
+                    }
+                    return this.fns.length;
+                }
+            };
+
+            return constructor;
+        }()),
+        returnTrue = function () {
+            return true;
+        },
+        returnFalse = function () {
+            return false;
         };
 
     // Exports.
     jsMVC._ = {
         noop: noop,
         error: error,
-        forEachArrayItem: forEachItem,
+        forEachItem: forEachItem,
         indexOf: indexOf,
         some: some,
         reduceRight: reduceRight,
         map: map,
         getArrayValues: values,
-        forEachObjectKey: forEachKey,
+        forEachKey: forEachKey,
         copyProperties: copyProps,
         countKeys: countKeys,
         type: type,
@@ -235,7 +280,10 @@
         isInteger: isInteger,
         isNumber: isNumber,
         isArray: isArray,
-        isWindow: isWindow
+        isWindow: isWindow,
+        Functions: Functions,
+        returnTrue: returnTrue,
+        returnFalse: returnFalse
     };
 
 }(this.window, !this.window && require, this.jsMVC || exports));

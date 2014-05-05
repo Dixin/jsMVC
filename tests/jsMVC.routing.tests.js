@@ -1,7 +1,7 @@
 ﻿/// <reference path="../tools/_references.js"/>
 /// <reference path="../source/_references.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     QUnit.module("jsMVC.routing");
@@ -21,7 +21,7 @@
         noop = _.noop,
         encodeUrl = _.encodeUrl;
 
-    test("Can get URL parts", function() {
+    test("Can get URL parts", function () {
         var result;
 
         result = getUrlParts("a/b/c/d");
@@ -30,7 +30,7 @@
         strictEqual(result[0], "a");
     });
 
-    test("Can get segment literal", function() {
+    test("Can get segment literal", function () {
         var result;
 
         result = getSegmentLiteral("abc");
@@ -43,7 +43,7 @@
         strictEqual(result, null);
     });
 
-    test("Can get index of first open parameter", function() {
+    test("Can get index of first open parameter", function () {
         var result;
 
         result = getIndexOfFirstOpenParameter("abc{d}");
@@ -56,7 +56,7 @@
         strictEqual(result, 0);
     });
 
-    test("Can get URL subsegment", function() {
+    test("Can get URL subsegment", function () {
         var result;
 
         result = getUrlSubsegments("a{{b}}c{d}efg{h}{i}j");
@@ -85,7 +85,7 @@
         strictEqual(result[0].value, "abc");
     });
 
-    test("Can valid URL subsegments", function() {
+    test("Can valid URL subsegments", function () {
         var result;
 
         result = isUrlSubsegmentsValid(getUrlSubsegments("abc"), {});
@@ -110,7 +110,7 @@
         strictEqual(result, false);
     });
 
-    test("Can valid URL parts", function() {
+    test("Can valid URL parts", function () {
         var result;
 
         result = isUrlPartsValid(getUrlParts("abc"), {});
@@ -147,7 +147,7 @@
         strictEqual(result, false);
     });
 
-    test("Can match segments", function() {
+    test("Can match segments", function () {
         var result;
 
         result = matchSegments(getParsedSegments("{a}/{b}/{c}"), "i/j/k");
@@ -193,7 +193,7 @@
         });
     });
 
-    test("Can create route and can match", function() {
+    test("Can create route and can match", function () {
         var result,
             route;
 
@@ -231,7 +231,7 @@
             e: "yzfgh/i"
         });
 
-        route = new Route("{a}/{b}/{c}", { a: "i", b: "j", c: "k" }, {}, {}, function() {
+        route = new Route("{a}/{b}/{c}", { a: "i", b: "j", c: "k" }, {}, {}, function () {
         });
         result = route.getRouteData("");
         deepEqual(result.values, {
@@ -240,7 +240,7 @@
             c: "k"
         });
 
-        route = new Route("{a}/{b}/{c}", { a: "i", b: "j", c: "k" }, {}, {}, function() {
+        route = new Route("{a}/{b}/{c}", { a: "i", b: "j", c: "k" }, {}, {}, function () {
         });
         result = route.getRouteData("ii/jj");
         deepEqual(result.values, {
@@ -250,11 +250,11 @@
         });
     });
 
-    test("Can have constraints", function() {
+    test("Can have constraints", function () {
         var result,
             route;
 
-        route = new Route("{a}/{b}/{c}", {}, { a: "[0-9]" }, {}, function() {
+        route = new Route("{a}/{b}/{c}", {}, { a: "[0-9]" }, {}, function () {
         });
         strictEqual(route.url, "{a}/{b}/{c}");
         result = route.getRouteData("1/2/3");
@@ -264,13 +264,13 @@
             c: "3"
         });
 
-        route = new Route("{a}/{b}/{c}", {}, { a: "[2-9]" }, {}, function() {
+        route = new Route("{a}/{b}/{c}", {}, { a: "[2-9]" }, {}, function () {
         });
         strictEqual(route.url, "{a}/{b}/{c}");
         result = route.getRouteData("1/2/3");
         strictEqual(result, null);
 
-        route = new Route("{a}/{b}/{c}", {}, { a: "\\d" }, {}, function() {
+        route = new Route("{a}/{b}/{c}", {}, { a: "\\d" }, {}, function () {
         });
         strictEqual(route.url, "{a}/{b}/{c}");
         result = route.getRouteData("1/2/3");
@@ -280,17 +280,17 @@
             c: "3"
         });
 
-        route = new Route("{a}/{b}/{c}", {}, { a: "\\D" }, {}, function() {
+        route = new Route("{a}/{b}/{c}", {}, { a: "\\D" }, {}, function () {
         });
         strictEqual(route.url, "{a}/{b}/{c}");
         result = route.getRouteData("1/2/3");
         strictEqual(result, null);
     });
 
-    test("Can for each parameter subsegment", function() {
+    test("Can for each parameter subsegment", function () {
         var result,
             count = 0;
-        result = forEachParameterSubsegment(getParsedSegments("{a}/{b}/{c}"), function() {
+        result = forEachParameterSubsegment(getParsedSegments("{a}/{b}/{c}"), function () {
             ++count;
             return true;
         });
@@ -298,7 +298,7 @@
         strictEqual(count, 3);
 
         count = 0;
-        result = forEachParameterSubsegment(getParsedSegments("a{{b}}c{d}/efg{h}/i"), function() {
+        result = forEachParameterSubsegment(getParsedSegments("a{{b}}c{d}/efg{h}/i"), function () {
             ++count;
             return true;
         });
@@ -306,7 +306,7 @@
         strictEqual(count, 2);
 
         count = 0;
-        result = forEachParameterSubsegment(getParsedSegments("a{{b}}c{d}/{*e}"), function() {
+        result = forEachParameterSubsegment(getParsedSegments("a{{b}}c{d}/{*e}"), function () {
             ++count;
             return true;
         });
@@ -314,7 +314,7 @@
         strictEqual(count, 2);
     });
 
-    test("Can get virtual path", function() {
+    test("Can get virtual path", function () {
         var result,
             route;
 
@@ -367,7 +367,7 @@
         strictEqual(result, null);
 
         route = new Route("a{{b}}c{d}/{e}", { e: 2 }, {
-            e: function(value) {
+            e: function (value) {
                 return value === 123;
             }
         }, {}, noop);
@@ -375,7 +375,7 @@
         strictEqual(result.virtualPath, encodeUrl("a{b}cx") + "/123");
 
         route = new Route("a{{b}}c{d}/{e}", { e: 2 }, {
-            e: function(value) {
+            e: function (value) {
                 return value === 124;
             }
         }, {}, noop);
@@ -387,7 +387,7 @@
         strictEqual(result.virtualPath, encodeUrl("a{b}cx") + "/3?f=1");
     });
 
-    test("Can handle special characters", function() {
+    test("Can handle special characters", function () {
         var result,
             route;
 
@@ -405,7 +405,7 @@
         strictEqual(result.virtualPath, encodeUrl("#%123!@#$%^&*()") + "/" + encodeUrl("abc中") + "/" + encodeUrl("文！·#￥%……—*（）"));
     });
 
-    test("Can handle query strings", function() {
+    test("Can handle query strings", function () {
         var result,
             route;
 
@@ -431,7 +431,7 @@
         strictEqual(result.virtualPath, "1/2/3?d=4&e=5");
     });
 
-    test("Route table can work", function() {
+    test("Route table can work", function () {
         var result;
 
         strictEqual(routeTable.length(), 0);
@@ -467,7 +467,7 @@
         strictEqual(routeTable.length(), 0);
     });
 
-    test("Route table can get virtual path", function() {
+    test("Route table can get virtual path", function () {
         var result;
 
         strictEqual(routeTable.length(), 0);
@@ -498,7 +498,7 @@
         strictEqual(routeTable.length(), 0);
     });
 
-    test("Route table can ignore", function() {
+    test("Route table can ignore", function () {
         var result,
             count = 0;
 
@@ -507,7 +507,7 @@
         routeTable.ignore("a/b/{x}", { x: "[0-9]+" });
         strictEqual(routeTable.length(), 1);
 
-        routeTable.push(new Route("{a}/{b}/{c}", {}, {}, {}, function() {
+        routeTable.push(new Route("{a}/{b}/{c}", {}, {}, {}, function () {
             ++count;
         }), "r1");
         strictEqual(routeTable.length(), 2);

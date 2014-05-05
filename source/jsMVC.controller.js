@@ -4,7 +4,7 @@
 /// <reference path="jsMVC.routing.browser.js"/>
 /// <reference path="jsMVC.routing.node.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     // Imports.
@@ -16,13 +16,14 @@
         isString = _.isString,
         isFunction = _.isFunction,
         isInteger = _.isInteger,
-        forEachItem = _.forEachArrayItem,
-        forEachKey = _.forEachObjectKey,
+        forEachItem = _.forEachItem,
+        forEachKey = _.forEachKey,
         copyProps = _.copyProperties,
         some = _.some,
         reduceRight = _.reduceRight,
         map = _.map,
         Event = _.Event,
+        returnFalse = _.returnFalse,
         // Local variables.
         separator = "/",
         emptyString = "",
@@ -40,30 +41,30 @@
         defaultOrder = 0,
         idKey = "id",
         // Routing
-        isValidRouteParameter = function(value, canBeEmpty) {
+        isValidRouteParameter = function (value, canBeEmpty) {
             return (canBeEmpty && (value === undefined || value === emptyString)) || (isString(value) && value.indexOf(separator) === -1 && value !== emptyString);
         },
-        validateRouteParameter = function(value, canBeEmpty) {
+        validateRouteParameter = function (value, canBeEmpty) {
             if (!isValidRouteParameter(value, canBeEmpty)) {
                 error(canBeEmpty ? "Route value must be valid." : "Route value must be valid and not empty.");
             }
             return value ? value.toLowerCase() : value;
         },
-        combinePaths = function(child, parent) {
+        combinePaths = function (child, parent) {
             return (parent ? parent + separator : emptyString) + validateRouteParameter(child);
         },
         // /Routing
 
         // Cache
-        Dictionary = (function() { // Case-insensitive dictionary
-            var constructor = function() {
+        Dictionary = (function () { // Case-insensitive dictionary
+            var constructor = function () {
                 this.items = {};
             };
 
             constructor.prototype = {
                 constructor: constructor,
 
-                push: function(key, item) {
+                push: function (key, item) {
                     var lowerCaseKey = key.toLowerCase();
                     if (nativeHasOwn.call(this.items, lowerCaseKey)) {
                         error("Key '" + key + "' must be unique.");
@@ -72,11 +73,11 @@
                     return item;
                 },
 
-                get: function(key) {
+                get: function (key) {
                     return this.items[key.toLowerCase()];
                 },
 
-                has: function(key, item) {
+                has: function (key, item) {
                     key = key.toLowerCase();
                     if (arguments.length > 1) {
                         return this.items[key] === item;
@@ -87,8 +88,8 @@
 
             return constructor;
         }()),
-        List = (function() {
-            var constructor = function(isOrderRequired, array) {
+        List = (function () {
+            var constructor = function (isOrderRequired, array) {
                 // TODO: Check array.
                 this.isOrderRequired = isOrderRequired;
                 this.items = array || [];
@@ -98,13 +99,15 @@
             };
             constructor.prototype = {
                 constructor: constructor,
-                sort: function() {
-                    this.items.sort(function(a, b) {
+
+                sort: function (compare) {
+                    compare = compare || function (a, b) {
                         return a.order - b.order;
-                    });
+                    };
+                    this.items.sort(compare);
                 },
 
-                push: function(item) {
+                push: function (item) {
                     if (this.isOrderRequired && !isInteger(item.order)) {
                         error("'order' must be integer.");
                     }
@@ -116,11 +119,11 @@
                     return item;
                 },
 
-                get: function(index) {
+                get: function (index) {
                     return this.items[index];
                 },
 
-                has: function(item) {
+                has: function (item) {
                     for (var index = 0; index < this.items.length; index++) {
                         if (item === this.items[index]) {
                             return true;
@@ -129,27 +132,31 @@
                     return false;
                 },
 
-                toArray: function() {
+                toArray: function () {
                     return this.items.slice();
                 },
 
-                forEach: function(callback, context) {
+                forEach: function (callback, context) {
                     forEachItem(this.items, callback, context);
                 },
 
-                map: function(callback, initial) {
+                map: function (callback, initial) {
                     return new List(this.isOrderRequired, map(this.items, callback, initial));
                 },
 
-                reduceRight: function(callback, initial) {
+                reverse: function () {
+                    return new List(this.isOrderRequired, this.items.reverse());
+                },
+
+                reduceRight: function (callback, initial) {
                     return reduceRight(this.items, callback, initial);
                 },
 
-                some: function(callback, context) {
+                some: function (callback, context) {
                     return some(this.items, callback, context);
                 },
 
-                length: function() {
+                length: function () {
                     return this.items.length;
                 }
             };
@@ -164,7 +171,7 @@
 
         // Filter
 
-        Filter = function(authorize, beforeAction, afterAction, fail, order) {
+        Filter = function (authorize, beforeAction, afterAction, fail, order) {
             if (authorize && !isFunction(authorize)) {
                 error("'authorize' must be empty or function.");
             }
@@ -186,39 +193,72 @@
                 error("'order' must be integer or undefined.");
             }
         },
-        getFilterList = function(optionsArray) {
+        getFilterList = function (optionsArray) {
             var filters = new List(true),
                 filter;
-            forEachItem(optionsArray, function(options) {
+            forEachItem(optionsArray, function (options) {
                 filter = new Filter(options[authorizeFilter], options[beforeActionFilter], options[afterActionFilter], options[errorFilter], options.order);
                 filters.push(filter);
             });
             return filters;
         },
-        executeFilters = function(event, levels, filterType) {
-            var result,
-                execute;
-            forEachItem(levels, function(filters) {
+        executeAndSetResult = function (event, execute) {
+            var previousResult = event.result,
+                result = execute(event);
+            if (result !== undefined) {
+                event.result = result;
+                return true;
+            }
+            event.result = previousResult; // Prvent execute(event) modifying event.result.
+            return false;
+        },
+        executeFilters = function (event, levels, filterType) {
+            var execute;
+            if (event.isPropagationStopped()) {
+                return; // If isPropagationStopped, do nothing.
+            }
+            event.isImmediatePropagationStopped = returnFalse;
+            forEachItem(levels, function (filters) {
+                if (event.isImmediatePropagationStopped()) {
+                    return false; // If isImmediatePropagationStopped, return false to break.
+                }
                 if (filters) {
-                    filters.forEach(function(filter) {
+                    filters.forEach(function (filter) {
+                        if (event.isImmediatePropagationStopped()) {
+                            return false; // If isImmediatePropagationStopped, return false to break.
+                        }
                         execute = filter[filterType];
                         if (execute) {
-                            result = execute(event); // TODO
-                            if (result) {
-                                return true;
-                            }
+                            executeAndSetResult(event, execute);
                         }
-                        return false;
-                    });
-                    if (result) {
                         return true;
-                    }
+                    });
                 }
-                return false;
+                return true;
             });
-            return result;
         },
-        pushFilter = function(options) {
+        executeErrorFilters = function (event, levels) {
+            var execute;
+            forEachItem(levels, function (filters) {
+                if (event.isErrorHandled()) {
+                    return false; // If isErrorHandled, return false to break.
+                }
+                if (filters) {
+                    filters.forEach(function (filter) {
+                        if (event.isErrorHandled()) {
+                            return false; // If isErrorHandled, return false to break.
+                        }
+                        execute = filter[errorFilter];
+                        if (execute) {
+                            executeAndSetResult(event, execute);
+                        }
+                        return true;
+                    });
+                }
+                return true;
+            });
+        },
+        pushFilter = function (options) {
             var filter = new Filter(options[authorizeFilter], options[beforeActionFilter], options[afterActionFilter], options[errorFilter], options.order),
                 target = options.target;
             if (!target) {
@@ -231,15 +271,15 @@
                 }
             }
         },
-        getGlobalFilters = function() {
+        getGlobalFilters = function () {
             return globalFilters.toArray();
         },
         // /Filter
 
         // Action
 
-        Action = (function() {
-            var constructor = function(controller, id, execute, filters) {
+        Action = (function () {
+            var constructor = function (controller, id, execute, filters) {
                 if (!controller || !allControllers.has(controller.virtualPath, controller)) {
                     error("'controller' must be valid.");
                 }
@@ -256,18 +296,18 @@
 
             constructor.prototype = {
                 constructor: constructor,
-                Filter: function(options) {
+                Filter: function (options) {
                     options.target = this;
                     return pushFilter(options);
                 },
 
-                getFilters: function() {
+                getFilters: function () {
                     return this.filters.toArray();
                 }
             };
             return constructor;
         }()),
-        pushAction = function(options) {
+        pushAction = function (options) {
             var filters = getFilterList(options.filters),
                 action;
             if (isFunction(options)) {
@@ -284,8 +324,8 @@
 
         // Controller
 
-        Controller = (function() {
-            var constructor = function(id, area, filters) {
+        Controller = (function () {
+            var constructor = function (id, area, filters) {
                 id = validateRouteParameter(id);
                 if (area && !allAreas.has(area.virtualPath, area)) {
                     error("'area' must be valid or empty.");
@@ -298,27 +338,27 @@
 
             constructor.prototype = {
                 constructor: constructor,
-                Action: function(options) {
+                Action: function (options) {
                     options.controller = this;
                     return pushAction(options);
                 },
 
-                Filter: function(options) {
+                Filter: function (options) {
                     options.target = this;
                     return pushFilter(options);
                 },
 
-                getAction: function(id) {
+                getAction: function (id) {
                     return allActions.get(combinePaths(id, this.virtualPath));
                 },
 
-                getFilters: function() {
+                getFilters: function () {
                     return this.filters.toArray();
                 }
             };
             return constructor;
         }()),
-        getActionOptions = function(options, id) {
+        getActionOptions = function (options, id) {
             if (isFunction(options)) {
                 options = {
                     execute: options
@@ -329,7 +369,7 @@
             }
             return options;
         },
-        pushController = function(options) {
+        pushController = function (options) {
             var filters,
                 controller;
             if (!options.area && options.areaId) {
@@ -338,63 +378,63 @@
             filters = getFilterList(options.filters);
             controller = new Controller(options[idKey], options.area, filters);
             allControllers.push(controller.virtualPath, controller);
-            forEachKey(options.actions, function(actionId, actionOptions) {
+            forEachKey(options.actions, function (actionId, actionOptions) {
                 actionOptions = getActionOptions(actionOptions, actionId);
                 controller.Action(actionOptions);
             });
             return controller;
         },
-        getController = function(id) {
+        getController = function (id) {
             return allControllers.get(id);
         },
         // /Controller
 
         // Area
 
-        Area = (function() {
-            var constructor = function(id, filters) {
+        Area = (function () {
+            var constructor = function (id, filters) {
                 this.virtualPath = this[idKey] = validateRouteParameter(id);
                 this.filters = filters;
             };
 
             constructor.prototype = {
                 constructor: constructor,
-                Route: function(options) {
+                Route: function (options) {
                     options.areaId = this[idKey];
                     return pushRoute(options);
                 },
 
-                Controller: function(options) {
+                Controller: function (options) {
                     options.area = this;
                     return pushController(options);
                 },
 
-                Filter: function(options) {
+                Filter: function (options) {
                     options.target = this;
                     return pushFilter(options);
                 },
 
-                getController: function(id) {
+                getController: function (id) {
                     return allControllers.get(combinePaths(id, this.virtualPath));
                 },
 
-                getFilters: function() {
+                getFilters: function () {
                     return this.filters.toArray();
                 }
             };
             return constructor;
         }()),
-        pushArea = function(options) {
+        pushArea = function (options) {
             var filters = getFilterList(options.filters),
                 area = new Area(options[idKey], filters);
             allAreas.push(area.virtualPath, area);
-            forEachKey(options.controllers, function(controllerId, controllerOptions) {
+            forEachKey(options.controllers, function (controllerId, controllerOptions) {
                 if (!nativeHasOwn.call(controllerOptions, idKey)) {
                     controllerOptions[idKey] = controllerId;
                 }
                 area.Controller(controllerOptions);
             });
-            forEachKey(options.routes, function(routeId, routeOptions) {
+            forEachKey(options.routes, function (routeId, routeOptions) {
                 if (!nativeHasOwn.call(routeOptions, idKey)) {
                     routeOptions[idKey] = routeId;
                 }
@@ -402,65 +442,33 @@
             });
             return area;
         },
-        getArea = function(id) {
+        getArea = function (id) {
             return allAreas.get(id);
         },
         // /Area
 
         // Execute
-        executeResult = function(event, result) {
-            if (result) {
+        executeResult = function (event, result) {
+            if (result && isFunction(result.execute)) {
                 result.execute(event);
             }
         },
-        handleError = function(event, errorObject, errorStatus, filterLevels) {
+        handleError = function (event, errorObject, errorStatus, filterLevels) {
             copyProps(event, {
                 status: errorStatus,
                 error: errorObject
             }, true);
-            var result = executeFilters(event, filterLevels, errorFilter);
-            if (!result) {
+            executeErrorFilters(event, filterLevels);
+            if (!event.isErrorHandled()) {
                 throw errorObject;
             }
-            return executeResult(event, result);
+            return executeResult(event, event.result);
         },
-        executeWithFilter = function(event, before, execute, after) {
-            var result,
-                hasError = false;
-
-            if (before) {
-                result = before(event);
-            }
-            if (result) {
-                return result;
-            }
-            try {
-                result = execute(event);
-            } catch (e) {
-                hasError = true;
-                copyProps(event, {
-                    status: status.internalError,
-                    error: e
-                }, true);
-                if (after) {
-                    result = after(event);
-                }
-                if (!result) {
-                    throw e;
-                }
-            }
-            if (!hasError && after) {
-                event.result = result;
-                result = after(event);
-            }
-            return result;
-        },
-        executeAction = function(routeData, virtualPath, actionId, controllerId, areaId /* optional */) {
-            var result,
-                event = routeData.dataTokens.event || new Event(),
+        executeAction = function (routeData, virtualPath, actionId, controllerId, areaId /* optional */) {
+            var event = routeData.dataTokens.event || new Event(),
                 action,
                 filterLevels,
-                execute;
+                reversedFilterLevels;
 
             delete routeData.dataTokens.event;
 
@@ -475,6 +483,7 @@
                 return handleError(event, e, status.badRequest, [globalFilters]);
             }
 
+            // TODO: Find area/controller.
             // 2. Find action.
             action = allActions.get(combinePaths(actionId, combinePaths(controllerId, areaId)));
             if (!action) {
@@ -489,35 +498,47 @@
                 controller: action.controller,
                 area: action.controller.area
             });
-            filterLevels = [globalFilters, event.area ? event.area.filters : null, event.controller.filters, event.action.filters];
+            filterLevels = [
+                globalFilters,
+                event.area ? event.area.filters : null,
+                event.controller.filters,
+                event.action.filters
+            ];
+            reversedFilterLevels = [
+                event.action.filters.reverse(),
+                event.controller.filters.reverse(),
+                event.area ? event.area.filters.reverse() : null,
+                globalFilters.reverse()
+            ];
             try {
                 // 3. Execute authorize filters
-                result = executeFilters(event, filterLevels, authorizeFilter);
-                if (result) {
-                    return executeResult(event, result);
+                executeFilters(event, filterLevels, authorizeFilter);
+
+                // Execute beforeAction filters.
+                executeFilters(event, filterLevels, beforeActionFilter);
+
+                // Execute Action.
+                if (!event.isDefaultPrevented()) {
+                    executeAndSetResult(event, action.execute);
                 }
 
-                // 4. Execute action with beforeAction and after Action filters
-                execute = event.action.filters.reduceRight(function(continuation, filter) {
-                    return function() {
-                        return executeWithFilter(event, filter[beforeActionFilter], continuation, filter[afterActionFilter]);
-                    };
-                }, action.execute);
-                result = execute(event);
-            } catch (e2) {
-                return handleError(event, e2, status.internalError, filterLevels);
-            }
+                // Execute afterAction filters.
+                executeFilters(event, reversedFilterLevels, afterActionFilter);
 
-            return executeResult(event, result);
+                // Execute result.
+                return executeResult(event, event.result);
+            } catch (e2) {
+                return handleError(event, e2, event.status || status.internalError, filterLevels);
+            }
         },
         // /Execute
 
         // MvcRouteHandler
 
-        mvcRouteHandler = function(routeData, virtualPath) {
+        mvcRouteHandler = function (routeData, virtualPath) {
             executeAction(routeData, virtualPath, routeData.values.action, routeData.values.controller, routeData.dataTokens.area);
         },
-        pushRoute = function(options) {
+        pushRoute = function (options) {
             if (options.areaId) {
                 options.dataTokens = options.dataTokens || {};
                 options.dataTokens.area = validateRouteParameter(options.areaId);
@@ -534,17 +555,17 @@
             controllers: pushController,
             routes: pushRoute
         },
-        push = function(configs) {
+        push = function (configs) {
             if (isString(configs) && node) { // configs is a path.
                 configs = node(configs);
             }
             // Filters.
-            forEachItem(configs.filters, function(options) {
+            forEachItem(configs.filters, function (options) {
                 pushFilter(options);
             });
             // Areas, controllers, routes.
-            forEachKey(configKeys, function(configKey, pushMethod) {
-                forEachKey(configs[configKey], function(optionsKey, options) {
+            forEachKey(configKeys, function (configKey, pushMethod) {
+                forEachKey(configs[configKey], function (optionsKey, options) {
                     if (!nativeHasOwn.call(options, idKey)) {
                         options[idKey] = optionsKey;
                     }
@@ -552,26 +573,25 @@
                 });
             });
 
+            copyProps(push, configs);
+
             return jsMVC;
         };
     // /Config
 
     // Exports.
-    copyProps(jsMVC, {
-        Route: pushRoute,
-        Area: pushArea,
-        Controller: pushController,
-        Filter: pushFilter,
-        getArea: getArea,
-        getController: getController,
-        getFilters: getGlobalFilters,
-        config: push,
-        status: status
-    });
-    
-    _.executeGlobalErrorFilters = function(event) {
-        executeFilters(event, [globalFilters], errorFilter);
+    jsMVC.Route = pushRoute;
+    jsMVC.Area = pushArea;
+    jsMVC.Controller = pushController;
+    jsMVC.Filter = pushFilter;
+    jsMVC.getArea = getArea;
+    jsMVC.getController = getController;
+    jsMVC.getFilters = getGlobalFilters;
+    jsMVC.status = status;
+
+    _.executeGlobalErrorFilters = function (event) {
+        executeErrorFilters(event, [globalFilters]);
     };
     // /Exports.
-    
+
 }(this.window, !this.window && require, this.jsMVC || exports));

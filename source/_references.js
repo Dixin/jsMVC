@@ -5,8 +5,9 @@
 /// <reference path="jsMVC.routing.browser.js"/>
 /// <reference path="jsMVC.routing.node.js"/>
 /// <reference path="jsMVC.controller.js"/>
-/// <reference path="jsMVC.controller.browser.js"/>
-/// <reference path="jsMVC.controller.node.js"/>
+/// <reference path="jsMVC.controller.event.js"/>
+/// <reference path="jsMVC.controller.event.browser.js"/>
+/// <reference path="jsMVC.controller.event.node.js"/>
 /// <reference path="jsMVC.observable.js"/>
 /// <reference path="jsMVC.bind.browser.js"/>
-/// <reference path="jsMVC.ready.js"/>
+/// <reference path="jsMVC.config.js"/>

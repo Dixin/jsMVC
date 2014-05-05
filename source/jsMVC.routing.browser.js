@@ -2,7 +2,7 @@
 /// <reference path="jsMVC._.js"/>
 /// <reference path="jsMVC.routing.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     if (!browser) {
@@ -34,21 +34,21 @@
         previousHref = location.href,
         currentHref,
         // Browser.
-        getHash = function(href) {
+        getHash = function (href) {
             // location.hash has issues in IE6.
             return href.replace(/^[^#]*#?(.*)$/, "$1"); // TODO: refactor.
         },
-        setHash = function(hash) {
+        setHash = function (hash) {
             if (hash.indexOf(hashDelimiter) === 0) {
-                hash.substr(1);
+                hash = hash.substr(1);
             }
             if (hash.indexOf(prefix) === 0) {
-                hash.substr(prefixLength);
+                hash = hash.substr(prefixLength);
             }
             hash = prefix + hash;
             location.hash = hash;
         },
-        normalizeEvent = function(options) {
+        normalizeEvent = function (options) {
             var event = new Event(),
                 virtualPath,
                 index,
@@ -70,24 +70,24 @@
                 currentTarget: options.currentTarget,
                 virtualPath: virtualPath,
                 routeData: routeTable.getRouteData(virtualPath),
-                
+
                 newHref: options.newURL || currentHref,
                 oldHref: options.oldURL || previousHref,
                 newHash: newHash,
                 oldHash: options.oldHash || getHash(previousHref),
-                
+
                 request: undefined,
                 response: undefined
             }, true);
             previousHref = currentHref;
             return event;
         },
-        listen = function(callback) {
+        listen = function (callback) {
             var onReadyStateChangeEvent = "onreadystatechange",
                 onLoadEvent = "onload",
                 proxyToIframe,
                 domReady,
-                eventListener = function(event) {
+                eventListener = function (event) {
                     trigger("request", normalizeEvent(event || browser.event));
                 },
                 iframeWindow;
@@ -101,14 +101,14 @@
                     browser.attachEvent(onHashChangeEvent, eventListener);
                 } else if (onReadyStateChangeEvent in document) {
                     // IE7, IE6.
-                    proxyToIframe = function() {
+                    proxyToIframe = function () {
                         var iframe = document.createElement(iframeHTML),
                             currentIframeHref,
                             previousIframeHref,
                             body,
-                            poll = function() {
+                            poll = function () {
                                 iframe.detachEvent(onLoadEvent, poll);
-                                browser.setInterval(function() {
+                                browser.setInterval(function () {
                                     currentHref = location.href;
                                     if (previousHref !== currentHref) {
                                         // window.location changed, now window drives iframeWindow.
@@ -158,7 +158,7 @@
                         iframeWindow = iframe.contentWindow;
                         previousIframeHref = iframeWindow.location.href;
                     };
-                    domReady = function() {
+                    domReady = function () {
                         if (document.readyState === "complete") {
                             document.detachEvent(onReadyStateChangeEvent, domReady);
                             proxyToIframe();
@@ -181,7 +181,7 @@
     // /Browser
 
     // Routing
-        go = function(destination, options) {
+        go = function (destination, options) {
             var oldHref = location.href,
                 virtualPathData,
                 oldRouteData;
@@ -191,7 +191,7 @@
                     history.go(destination); // IE6 / IE7 / Chrome / Safari / Opera does not support programatically go back / forward.
                     return location.href !== oldHref;
                 case "string":
-                    location.hash = destination;
+                    setHash(destination);
                     return location.href !== oldHref;
                 case "object":
                     oldRouteData = normalizeEvent().routeData;
@@ -207,7 +207,7 @@
         };
     // /Routing
 
-    jsMVC.go = go;
+    jsMVC.go = go; // TODO: Consider removing this.
     jsMVC.current = normalizeEvent;
 
     _.listen = listen;

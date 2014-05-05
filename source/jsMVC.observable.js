@@ -1,15 +1,16 @@
 ﻿/// <reference path="jsMVC.js"/>
 /// <reference path="jsMVC._.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
+    "use strict";
 
     // Imports
     var nativeHasOwn = Object.prototype.hasOwnProperty,
         // Imports
         _ = jsMVC._,
         error = _.error,
-        forEachItem = _.forEachArrayItem,
-        forEachKey = _.forEachObjectKey,
+        forEachItem = _.forEachItem,
+        forEachKey = _.forEachKey,
         copyProps = _.copyProperties,
         isFunction = _.isFunction,
         isObject = _.isObject,
@@ -26,18 +27,18 @@
 
     // Observable
 
-    var fireObservable = function(observable, eventType, newValue, oldValue, key) {
-        forEachItem(observable._eventListeners[eventType], function(listener) {
+    var fireObservable = function (observable, eventType, newValue, oldValue, key) {
+        forEachItem(observable._eventListeners[eventType], function (listener) {
             listener.call(observable, newValue, oldValue, eventType, key);
         });
         if (arguments.length > 4) {
-            forEachItem(observable._keyEventListeners[eventType][key], function(listener) {
+            forEachItem(observable._keyEventListeners[eventType][key], function (listener) {
                 listener.call(observable, newValue, oldValue, eventType, key);
             });
         }
     };
 
-    var addObservableKeyEventListener = function(observable, eventType, listener, key) {
+    var addObservableKeyEventListener = function (observable, eventType, listener, key) {
         var keyListeners = observable._keyEventListeners[eventType];
         if (!nativeHasOwn.call(keyListeners, key)) {
             keyListeners[key] = [];
@@ -45,17 +46,17 @@
         keyListeners[key].push(listener);
     };
 
-    var addObservableEventListener = function(observable, eventType, listener) {
+    var addObservableEventListener = function (observable, eventType, listener) {
         observable._eventListeners[eventType].push(listener);
     };
 
-    var removeObservableKeyListeners = function(observable, key) {
-        forEachKey(observable._keyEventListeners, function(eventType) {
+    var removeObservableKeyListeners = function (observable, key) {
+        forEachKey(observable._keyEventListeners, function (eventType) {
             observable._keyEventListeners[eventType][key] = [];
         });
     };
 
-    var removeObservableKeyEventListeners = function(observable, eventType, key) {
+    var removeObservableKeyEventListeners = function (observable, eventType, key) {
         if (eventType in observable._keyEventListeners) {
             var eventListeners = observable._keyEventListeners[eventType];
             if (key in eventListeners) {
@@ -64,7 +65,7 @@
         }
     };
 
-    var removeObservableEventListener = function(observable, eventType, listener) {
+    var removeObservableEventListener = function (observable, eventType, listener) {
         if (eventType in observable._eventListeners) {
             var eventListeners = observable._eventListeners[eventType];
             for (var index = 0; index < eventListeners.length; index++) {
@@ -77,14 +78,14 @@
         }
     };
 
-    var removeObservableEventListeners = function(observable, eventType) {
+    var removeObservableEventListeners = function (observable, eventType) {
         var eventListeners = observable._eventListeners;
         if (eventType in eventListeners) {
             eventListeners[eventType] = [];
         }
     };
 
-    var removeObservableKeyEventListener = function(observable, eventType, listener, key) {
+    var removeObservableKeyEventListener = function (observable, eventType, listener, key) {
         if (eventType in observable._keyEventListeners) {
             var eventListeners = observable._keyEventListeners[eventType];
             if (key in eventListeners) {
@@ -102,9 +103,9 @@
         }
     };
 
-    var removeObservableListener = function(observable, listener) {
+    var removeObservableListener = function (observable, listener) {
         var index;
-        forEachKey(observable._eventListeners, function(eventType, eventListeners) {
+        forEachKey(observable._eventListeners, function (eventType, eventListeners) {
             for (index = 0; index < eventListeners.length;) {
                 if (eventListeners[index] === listener) {
                     eventListeners.splice(index, 1);
@@ -113,8 +114,8 @@
                 }
             }
         });
-        forEachKey(observable._keyEventListeners, function(eventType, eventListeners) {
-            forEachKey(eventListeners, function(key, keyListeners) {
+        forEachKey(observable._keyEventListeners, function (eventType, eventListeners) {
+            forEachKey(eventListeners, function (key, keyListeners) {
                 for (index = 0; index < keyListeners.length;) {
                     if (keyListeners[index] === listener) {
                         keyListeners.splice(index, 1);
@@ -126,8 +127,8 @@
         });
     };
 
-    var Observable = (function() {
-        var constructor = function(data, asCopy) {
+    var Observable = (function () {
+        var constructor = function (data, asCopy) {
             this.isArray = isArray(data);
             if (!this.isArray && !isObject(data)) {
                 error("'data' must be object or array.");
@@ -141,12 +142,12 @@
             var that = this;
 
             this._eventListeners = {};
-            forEachKey(eventTypes, function(eventType) {
+            forEachKey(eventTypes, function (eventType) {
                 that._eventListeners[eventType] = [];
             });
 
             this._keyEventListeners = {};
-            forEachKey(eventTypes, function(keyEventType) {
+            forEachKey(eventTypes, function (keyEventType) {
                 that._keyEventListeners[keyEventType] = {};
             });
         };
@@ -154,15 +155,15 @@
         constructor.prototype = {
             constructor: constructor,
 
-            length: function() {
+            length: function () {
                 return this.isArray ? this.data.length : countKeys(this.data);
             },
 
-            get: function(key) {
+            get: function (key) {
                 return this.data[key];
             },
 
-            set: function(key, value) {
+            set: function (key, value) {
                 if (!nativeHasOwn.call(this.data, key)) {
                     error("Key or index '" + key + "' must be existing.");
                 }
@@ -174,7 +175,7 @@
                 return this;
             },
 
-            add: function() {
+            add: function () {
                 var args = arguments,
                     key,
                     value,
@@ -210,7 +211,7 @@
                     var dependentKeys = args[2];
                     value = getter.apply(this, getArrayValues(this.data, dependentKeys));
                     this.data[key] = value;
-                    this.on(eventTypes.change, function(newValue, oldValue, eventType, changedKey) {
+                    this.on(eventTypes.change, function (newValue, oldValue, eventType, changedKey) {
                         if (indexOf(dependentKeys, changedKey) >= 0) {
                             this.set(key, getter.apply(this, getArrayValues(this.data, dependentKeys)));
                         }
@@ -221,11 +222,11 @@
                 return this;
             },
 
-            push: function(item) {
+            push: function (item) {
                 return this.add(item);
             },
 
-            pop: function() {
+            pop: function () {
                 if (!this.isArray) {
                     error("Popping an item must be used for array.");
                 }
@@ -234,7 +235,7 @@
                 return item;
             },
 
-            addAt: function(index, item) {
+            addAt: function (index, item) {
                 if (!this.isArray) {
                     error("Adding item at an index must be used for array.");
                 }
@@ -246,7 +247,7 @@
                 return this;
             },
 
-            remove: function() {
+            remove: function () {
                 var args = arguments,
                     key,
                     value;
@@ -272,7 +273,7 @@
                 return this;
             },
 
-            removeAll: function(keys) {
+            removeAll: function (keys) {
                 var index;
 
                 if (this.isArray) {
@@ -284,7 +285,7 @@
                         }
                     } else {
                         // removeAll(indexes) for array.
-                        keys.sort(function(a, b) {
+                        keys.sort(function (a, b) {
                             return b - a;
                         });
                     }
@@ -295,18 +296,18 @@
                     if (arguments.length < 1) {
                         // removeAll() for object.
                         keys = [];
-                        forEachKey(this.data, function(key) {
+                        forEachKey(this.data, function (key) {
                             keys.push(key);
                         });
                     }
                     // removeAll(keys) for object.
-                    forEachItem(keys, function(key) {
+                    forEachItem(keys, function (key) {
                         this.remove(key);
                     });
                 }
             },
 
-            removeAt: function(index) {
+            removeAt: function (index) {
                 if (!this.isArray) {
                     error("Removing item at an index must be used for array.");
                 }
@@ -319,7 +320,7 @@
                 removeObservableKeyListeners(this, index);
             },
 
-            on: function(eventType, listener, key) { // listener: (newValue, oldValue, event, key)
+            on: function (eventType, listener, key) { // listener: (newValue, oldValue, event, key)
                 if (arguments.length < 3) {
                     // on(eventType, listener)
                     if (!isFunction(eventType)) {
@@ -337,7 +338,7 @@
                 return this;
             },
 
-            off: function() {
+            off: function () {
                 var args = arguments,
                     listener = args[0],
                     key;
@@ -370,7 +371,7 @@
                 return this;
             },
 
-            forEach: function(callback, context) {
+            forEach: function (callback, context) {
                 if (arguments.length < 2) {
                     context = this;
                 }
@@ -380,7 +381,7 @@
                     forEachKey(this.data, callback, context);
                 }
             },
-            
+
             sort: function (callback) {
                 // TODO: Implement.
             }
@@ -388,23 +389,23 @@
         return constructor;
     }());
 
-    var isObservable = function(object) {
+    var isObservable = function (object) {
         return object && object.constructor === Observable;
     };
 
-    var getValue = function(data, key) {
+    var getValue = function (data, key) {
         return isObservable(data) ? data.get(key) : data[key];
     };
 
     // /Observable
 
     // Exports
-    jsMVC.Observable = function(data) {
+    jsMVC.Observable = function (data) {
         return new Observable(data);
     };
     jsMVC.Observable.eventTypes = eventTypes;
     jsMVC.isObservable = isObservable;
-    
+
     _.getValue = getValue;
     // /Exports
 

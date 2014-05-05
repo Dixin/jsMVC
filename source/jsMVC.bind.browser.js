@@ -2,7 +2,7 @@
 /// <reference path="jsMVC._.js"/>
 /// <reference path="jsMVC.observable.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     if (!browser) {
@@ -15,8 +15,8 @@
         _ = jsMVC._,
         noop = _.noop,
         error = _.error,
-        forEachItem = _.forEachArrayItem,
-        forEachKey = _.forEachObjectKey,
+        forEachItem = _.forEachItem,
+        forEachKey = _.forEachKey,
         isFunction = _.isFunction,
         isObject = _.isObject,
         isArray = _.isArray,
@@ -25,18 +25,18 @@
         observableEventTypes = jsMVC.Observable.eventTypes,
         isObservable = jsMVC.isObservable,
         // Other utilities
-        hasKey = function(object) {
+        hasKey = function (object) {
             var result = false;
-            forEachKey(object, function() {
+            forEachKey(object, function () {
                 result = true;
-                return true; // break forEachObjectKey.
+                return false; // break forEachKey.
             });
             return result;
         },
         nativeTrim = String.prototype.trim,
-        trim = nativeTrim ? function(value) {
+        trim = nativeTrim ? function (value) {
             return nativeTrim.call(value);
-        } : function(value) {
+        } : function (value) {
             return value.replace(/^\s+|\s+$/g, "");
         },
         // Constants.
@@ -87,7 +87,7 @@
             unload: true,
             wheel: true
         },
-        propertyComplianceMap = (function() {
+        propertyComplianceMap = (function () {
             var map = {};
             // innerText / textContent
             if (testElement.textContent === undefined && testElement.innerText !== undefined) {
@@ -101,47 +101,47 @@
         bindIdKey = "jsdatabindid",
         dataBindIdKey = dataPrefix + bindIdKey,
         // DOM Utilities
-        setElementBindIdAttribute = testElement.dataset ? function(element, bindId) {
+        setElementBindIdAttribute = testElement.dataset ? function (element, bindId) {
             element.dataset[bindIdKey] = bindId;
-        } : function(element, bindId) {
+        } : function (element, bindId) {
             element.setAttribute(dataBindIdKey, bindId);
         },
-        getElementBindIdAttribute = function(element) {
+        getElementBindIdAttribute = function (element) {
             return element.getAttribute(dataBindIdKey);
         },
-        removeElementBindIdAttribute = function(element) {
+        removeElementBindIdAttribute = function (element) {
             element.removeAttribute(dataBindIdKey);
         },
-        getPropertyBindDeclaration = testElement.dataset ? function(element) {
+        getPropertyBindDeclaration = testElement.dataset ? function (element) {
             return element.dataset[bindKey];
-        } : function(element) {
+        } : function (element) {
             return element.getAttribute(dataBindKey);
         },
-        getPropertyBindBackDeclaration = testElement.dataset ? function(element) {
+        getPropertyBindBackDeclaration = testElement.dataset ? function (element) {
             return element.dataset[bindBackKey];
-        } : function(element) {
+        } : function (element) {
             return element.getAttribute(dataBindBackKey);
         },
-        getElementBindDeclaration = testElement.dataset ? function(element) {
+        getElementBindDeclaration = testElement.dataset ? function (element) {
             return element.dataset[eachKey];
-        } : function(element) {
+        } : function (element) {
             return element.getAttribute(dataEachKey);
         },
-        addEventListener = browser.addEventListener ? function(element, eventTypes, listener) {
-            forEachItem(trim(eventTypes).split(/\s+/), function(eventType) { // "click change" -> ["click", "change"]
+        addEventListener = browser.addEventListener ? function (element, eventTypes, listener) {
+            forEachItem(trim(eventTypes).split(/\s+/), function (eventType) { // "click change" -> ["click", "change"]
                 element.addEventListener(eventType, listener, false);
             });
-        } : (browser.attachEvent ? function(element, eventTypes, listener) {
-            forEachItem(trim(eventTypes).split(/\s+/), function(eventType) { // "click change" -> ["click", "change"]
+        } : (browser.attachEvent ? function (element, eventTypes, listener) {
+            forEachItem(trim(eventTypes).split(/\s+/), function (eventType) { // "click change" -> ["click", "change"]
                 element.attachEvent(eventTypePrefix + eventType, listener);
             });
         } : noop),
-        removeEventListener = browser.removeEventListener ? function(element, eventTypes, listener) {
-            forEachItem(trim(eventTypes).split(/\s+/), function(eventType) { // "click change" -> ["click", "change"]
+        removeEventListener = browser.removeEventListener ? function (element, eventTypes, listener) {
+            forEachItem(trim(eventTypes).split(/\s+/), function (eventType) { // "click change" -> ["click", "change"]
                 element.removeEventListener(eventType, listener, false);
             });
-        } : (browser.detachEvent ? function(element, eventTypes, listener) {
-            forEachItem(trim(eventTypes).split(/\s+/), function(eventType) { // "click change" -> ["click", "change"]
+        } : (browser.detachEvent ? function (element, eventTypes, listener) {
+            forEachItem(trim(eventTypes).split(/\s+/), function (eventType) { // "click change" -> ["click", "change"]
                 element.detachEvent(eventTypePrefix + eventType, listener);
             });
         } : noop);
@@ -150,14 +150,14 @@
 
     var bindIdValue = 0;
 
-    var getBindIdValue = function() {
+    var getBindIdValue = function () {
         return ++bindIdValue; // bindIdValue will not be 0.
     };
 
     var indexRegExp = /(\[\d+\])/g;
     var indexRegExpReplace = ".$1";
 
-    var formatPath = function(value) {
+    var formatPath = function (value) {
         value = trim(value).replace(indexRegExp, indexRegExpReplace); // [123] -> .[123]
         return value.length > 0 ? value : null;
     };
@@ -166,52 +166,52 @@
     var thisKey = "this";
 
     var simpleChangeEventHelper = {
-        add: function(element, listener) {
+        add: function (element, listener) {
             addEventListener(element, "change", listener);
         },
-        remove: function(element, listener) {
+        remove: function (element, listener) {
             removeEventListener(element, "change", listener);
         }
     };
-    var complexChangeEventHelper = (function() {
+    var complexChangeEventHelper = (function () {
         if (browser.ActiveXObject) {
             // IE
             return document.documentMode === 9 ? { // IE9: propertychange and keyup
-                add: function(element, listener) {
-                    forEachItem(["propertychange", "keyup"], function(eventType) {
+                add: function (element, listener) {
+                    forEachItem(["propertychange", "keyup"], function (eventType) {
                         element.attachEvent(eventTypePrefix + eventType, listener);
                     });
                 },
-                remove: function(element, listener) {
-                    forEachItem(["propertychange", "keyup"], function(eventType) {
+                remove: function (element, listener) {
+                    forEachItem(["propertychange", "keyup"], function (eventType) {
                         element.detachEvent(eventTypePrefix + eventType, listener);
                     });
                 }
             } : { // IE6, IE7, IE8, IE10: propertychange
-                add: function(element, listener) {
+                add: function (element, listener) {
                     element.attachEvent(eventTypePrefix + "propertychange", listener);
                 },
-                remove: function(element, listener) {
+                remove: function (element, listener) {
                     element.detachEvent(eventTypePrefix + "propertychange", listener);
                 }
             };
         } else {
             // Chrome, firefox, safari: input and blur. No DOM observing, DOMAttrModified/Observer not working.
             return {
-                add: function(element, listener) {
-                    forEachItem(["input", "blur"], function(eventType) {
+                add: function (element, listener) {
+                    forEachItem(["input", "blur"], function (eventType) {
                         element.addEventListener(eventType, listener, false);
                     });
                 },
-                remove: function(element, listener) {
-                    forEachItem(["input", "blur"], function(eventType) {
+                remove: function (element, listener) {
+                    forEachItem(["input", "blur"], function (eventType) {
                         element.removeEventListener(eventType, listener, false);
                     });
                 }
             };
         }
     }());
-    var removeChangeEventListener = browser.ActiveXObject ? function(element, eventType, listener) {
+    var removeChangeEventListener = browser.ActiveXObject ? function (element, eventType, listener) {
         switch (type) {
             case "propertychange":
             case "keyup":
@@ -219,10 +219,10 @@
             default:
                 removeEventListener(element, eventType, listener);
         }
-    } : function(element, event, listener) {
+    } : function (element, event, listener) {
         removeEventListener(element, event.type, listener);
     };
-    var isBindBackSupported = function(element, event) {
+    var isBindBackSupported = function (element, event) {
         switch (event.type) {
             case "propertychange":
                 return event.propertyName === "value";
@@ -310,7 +310,7 @@
         // TODO: keygen, datalist
     };
 
-    var getChangeEventListenerHelper = function(element, elementPath) {
+    var getChangeEventListenerHelper = function (element, elementPath) {
         var tagName = element.tagName,
             supportHelper = bindBackSupportMap[tagName];
         if (!supportHelper) {
@@ -325,7 +325,7 @@
         return supportHelper[elementPath];
     };
 
-    var getPathKeys = function(path, format) {
+    var getPathKeys = function (path, format) {
         if (format) {
             path = formatPath(path); // [123] -> .[123]
         }
@@ -336,7 +336,7 @@
         if (keys[0] === thisKey) {
             keys = keys.slice(1); // remove beginning "this".
         }
-        forEachItem(keys, function(key, index) {
+        forEachItem(keys, function (key, index) {
             if (indexKeyRegExp.test(key)) { // "[123]" -> Number(123)
                 keys[index] = parseInt(key.substring(1, key.length - 1), 10);
             }
@@ -344,7 +344,7 @@
         return keys;
     };
 
-    var getPropertyMap = function(declarations, dataPathPrefix) {
+    var getPropertyMap = function (declarations, dataPathPrefix) {
         var dataKeys;
         if (!declarations) {
             return null;
@@ -378,7 +378,7 @@
 
     var propertyBindingCache = {};
 
-    var pushPropertyBinding = function(binding) {
+    var pushPropertyBinding = function (binding) {
         var bindId = binding.id;
         if (bindId in propertyBindingCache) {
             error("Property binding (id: " + bindId + ") must has unique id.");
@@ -386,17 +386,17 @@
         propertyBindingCache[bindId] = binding;
     };
 
-    var getPropertyBinding = function(bindId) {
+    var getPropertyBinding = function (bindId) {
         return propertyBindingCache[bindId];
     };
 
-    var destroyPropertyBinding = function(bindId) {
+    var destroyPropertyBinding = function (bindId) {
         var propertyBinding = getPropertyBinding(bindId);
         if (!propertyBinding) {
             return;
         }
         if (propertyBinding.eventListeners) {
-            forEachKey(propertyBinding.eventListeners, function(key, eventListener) {
+            forEachKey(propertyBinding.eventListeners, function (key, eventListener) {
                 removeEventListener(propertyBinding.element, key, eventListener);
                 delete propertyBinding.eventListeners[key];
             });
@@ -404,7 +404,7 @@
         }
 
         if (propertyBinding.propertyBackMap) {
-            forEachKey(propertyBinding.propertyBackMap, function(elementPath) {
+            forEachKey(propertyBinding.propertyBackMap, function (elementPath) {
                 var changeEventListenerHelper = getChangeEventListenerHelper(propertyBinding.element, elementPath);
                 changeEventListenerHelper.remove(propertyBinding.element, setDataPropertyListener);
                 delete propertyBinding.propertyBackMap[elementPath];
@@ -421,7 +421,7 @@
 
     var elementBindingCache = {};
 
-    var pushElementBinding = function(binding) {
+    var pushElementBinding = function (binding) {
         var bindId = binding.id;
         if (bindId in elementBindingCache) {
             error("Element binding (id: " + bindId + ") must has unique id.");
@@ -429,11 +429,11 @@
         elementBindingCache[bindId] = binding;
     };
 
-    var getElementBinding = function(bindId) {
+    var getElementBinding = function (bindId) {
         return elementBindingCache[bindId];
     };
 
-    var destroyElementBinding = function(bindId) {
+    var destroyElementBinding = function (bindId) {
         var elementBinding = getElementBinding(bindId);
 
         if (!elementBinding) {
@@ -452,7 +452,7 @@
 
     // Element binding
 
-    var setElement = function(newValue, oldValue, eventType, index, parentElement, template, templateChildCount) {
+    var setElement = function (newValue, oldValue, eventType, index, parentElement, template, templateChildCount) {
         var nodeIndex = index * templateChildCount;
         switch (eventType) {
             case observableEventTypes.add:
@@ -480,14 +480,14 @@
         }
     };
 
-    var addElementsForArray = function(item, itemIndex) {
+    var addElementsForArray = function (item, itemIndex) {
         setElement(item, undefined, observableEventTypes.add, itemIndex, this.parentElement, this.template, this.templateChildCount);
     };
 
-    var setElementListener = function(newValue, oldValue, eventType, key) {
+    var setElementListener = function (newValue, oldValue, eventType, key) {
         var dataScope,
             index;
-        forEachKey(this._elementMaps, function(bindId, dataKeys) {
+        forEachKey(this._elementMaps, function (bindId, dataKeys) {
             var elementBinding = getElementBinding(bindId);
             if (elementBinding) {
                 if (dataKeys.length === 0) {
@@ -561,7 +561,7 @@
         }, this);
     };
 
-    var ElementBinding = function(bindId, dataKeys, data, parentElement) {
+    var ElementBinding = function (bindId, dataKeys, data, parentElement) {
         var isObservingArray = false,
             index,
             dataScope = data,
@@ -607,7 +607,7 @@
                         dataScope.on(observableEventTypes.change, setElementListener);
                     }
                     dataScope._elementMaps[bindId] = [];
-                    dataScope.forEach(function(item, itemIndex) {
+                    dataScope.forEach(function (item, itemIndex) {
                         setElement(dataScope.get(itemIndex), undefined, observableEventTypes.add, itemIndex, parentElement, templateFragment, childCount);
                     });
                 }
@@ -632,7 +632,7 @@
 
     // Property binding
 
-    var setElementProperty = function(element, elementPath, value, eventListeners) {
+    var setElementProperty = function (element, elementPath, value, eventListeners) {
         var elementKeys = getPathKeys(elementPath); // TODO: format?
         var elementScope = element;
         for (var index = 0; elementScope && index < elementKeys.length - 1; index++) {
@@ -663,16 +663,16 @@
         }
     };
 
-    var setElementPropertyListener = function(newValue, oldValue, eventType, key) {
+    var setElementPropertyListener = function (newValue, oldValue, eventType, key) {
         var propertyBinding,
             dataScope,
             index,
             currentMap;
 
-        forEachKey(this._propertyMaps, function(bindId, propertyMap) { // TODO: O(N^3), consider improve.
+        forEachKey(this._propertyMaps, function (bindId, propertyMap) { // TODO: O(N^3), consider improve.
             propertyBinding = getPropertyBinding(bindId);
             if (propertyBinding) {
-                forEachKey(propertyMap, function(elementPath, dataKeys) {
+                forEachKey(propertyMap, function (elementPath, dataKeys) {
                     if (dataKeys.length === 1 && dataKeys[0] === key) { // key is "a", dataPath is "a"
                         setElementProperty(propertyBinding.element, elementPath, newValue, propertyBinding.eventListeners);
                     } else if (dataKeys.length > 1 && dataKeys[0] === key) { // key is "a", dataPath is "a.b.c"
@@ -734,7 +734,7 @@
         }, this);
     };
 
-    var setDataValueByKey = function(data, key, value) {
+    var setDataValueByKey = function (data, key, value) {
         if (isObservable(data)) {
             data.set(key, value);
         } else if (isObject(data)) {
@@ -742,7 +742,7 @@
         }
     };
 
-    var setDataProperty = function(data, dataKeys, value) {
+    var setDataProperty = function (data, dataKeys, value) {
         var dataScope = data;
         for (var index = 0; dataScope && index < dataKeys.length - 1; index++) {
             dataScope = getValue(dataScope, dataKeys[index]);
@@ -750,7 +750,7 @@
         setDataValueByKey(dataScope, dataKeys[index], value);
     };
 
-    var setDataPropertyListener = function(event) {
+    var setDataPropertyListener = function (event) {
         event = event || browser.event;
         var element = event.target || event.srcElement;
         if (!element) {
@@ -771,12 +771,12 @@
         }
         // This element has binding.
         var data = binding.data;
-        forEachKey(binding.propertyBackMap, function(elementPath, dataKeys) {
+        forEachKey(binding.propertyBackMap, function (elementPath, dataKeys) {
             setDataProperty(data, dataKeys, element[elementPath]);
         });
     };
 
-    var PropertyBinding = function(bindId, propertyMap, propertyBackMap, data, element) {
+    var PropertyBinding = function (bindId, propertyMap, propertyBackMap, data, element) {
         var isObservingData = false,
             isObservingElement = false,
             dataScope,
@@ -787,7 +787,7 @@
             changeEventListenerHelper;
 
         if (propertyMap) {
-            forEachKey(propertyMap, function(elementPath, dataKeys) {
+            forEachKey(propertyMap, function (elementPath, dataKeys) {
                 dataScope = data;
                 observeDataPath = false;
 
@@ -818,7 +818,7 @@
         }
 
         if (propertyBackMap) {
-            forEachKey(propertyBackMap, function(elementPath, dataKeys) {
+            forEachKey(propertyBackMap, function (elementPath, dataKeys) {
                 // Not tree here.
                 changeEventListenerHelper = getChangeEventListenerHelper(element, elementPath);
                 if (changeEventListenerHelper) {
@@ -849,7 +849,7 @@
 
     // Bind
 
-    var bindElement = function(element, data, dataPathPrefix) { // TODO: data-context
+    var bindElement = function (element, data, dataPathPrefix) { // TODO: data-context
         var bindId,
             binding,
             declaration,
@@ -908,15 +908,15 @@
         return bindChildren;
     };
 
-    var bindSiblingElements = function(siblings, data, dataPathPrefix) {
-        forEachItem(siblings, function(element) {
+    var bindSiblingElements = function (siblings, data, dataPathPrefix) {
+        forEachItem(siblings, function (element) {
             if (element.nodeType === 1) {
                 bindElementAndChildren(element, data, dataPathPrefix);
             }
         });
     };
 
-    var bindElementAndChildren = function(element, data, dataPathPrefix) {
+    var bindElementAndChildren = function (element, data, dataPathPrefix) {
         var bindChildren = bindElement(element, data, dataPathPrefix);
         if (bindChildren && element.hasChildNodes) {
             bindSiblingElements(element.childNodes, data, dataPathPrefix);
@@ -927,7 +927,7 @@
 
     // Bind root
 
-    var bind = function(root, data) {
+    var bind = function (root, data) {
         var index;
         if (root.nodeType) { // Single node.
             bindElementAndChildren(root, data);
@@ -949,7 +949,7 @@
         }
     };
 
-    var unbind = function(root) {
+    var unbind = function (root) {
         bind(root, undefined);
     };
 
@@ -965,17 +965,17 @@
     jsMVC.unbind = unbind;
 
     if (jQuery) {
-        jQuery.fn.dataBind = function(data) {
-            return this.each(function() {
+        jQuery.fn.dataBind = function (data) {
+            return this.each(function () {
                 bind(this, data);
             });
         };
-        jQuery.fn.dataUnbind = function() {
-            return this.each(function() {
+        jQuery.fn.dataUnbind = function () {
+            return this.each(function () {
                 unbind(this);
             });
         };
     }
-    
+
     // /Exports.
 }(this.window, !this.window && require, this.jsMVC || exports));

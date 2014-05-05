@@ -1,4 +1,6 @@
-﻿(function() {
+﻿(function () {
+    "use strict";
+
     var sourceFolder = "../source/",
         buildFolder = "../build/",
         list = "_references.js",
@@ -7,12 +9,12 @@
         mapFile = "jsMVC.min.js.map",
         lineBreak = "\r\n",
         fs = require('fs'),
-        read = function(path) {
+        read = function (path) {
             return fs.readFileSync(path).toString().replace(/^\xef\xbb\xbf/, ""); // Remove BOM.
         },
         write = fs.writeFileSync,
         uglify = require("../tools/node_modules/uglify-js"), // https://github.com/mishoo/UglifyJS2
-        minify = function(code) {
+        minify = function (code) {
             return uglify.minify(code, {
                 fromString: true,
                 outSourceMap: mapFile,
@@ -20,10 +22,10 @@
             });
         },
         log = console.log,
-        files = read(sourceFolder + list).replace(/^\s+|\s+$/g, "").split("\n").map(function(file) {
+        files = read(sourceFolder + list).replace(/^\s+|\s+$/g, "").split("\n").map(function (file) {
             return file.replace(/^[\w\W]+\"(.*)\"[\w\W]+$/, "$1");
         }),
-        build = files.map(function(file) {
+        build = files.map(function (file) {
             file = sourceFolder + file;
             log("Reading '" + file + "'.");
             file = read(file).replace(/\s+$/g, "");

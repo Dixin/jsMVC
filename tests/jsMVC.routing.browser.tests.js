@@ -1,9 +1,9 @@
 ﻿/// <reference path="../tools/_references.js"/>
 /// <reference path="../source/_references.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
-    
+
     if (!browser) {
         // Not in browser.
         return;
@@ -15,21 +15,20 @@
         current = jsMVC.current,
         Route = jsMVC.routeTable.Route,
         go = jsMVC.go,
-        fail = jsMVC.fail,
-        cleanUpHash = function() {
+        cleanUpHash = function () {
             browser.location.hash = "";
         },
-        delay = function(callback) {
-            return $.Deferred(function(deferred, time) {
+        delay = function (callback) {
+            return $.Deferred(function (deferred, time) {
                 time = time || 150;
-                browser.setTimeout(function() {
+                browser.setTimeout(function () {
                     callback();
                     deferred.resolve();
                 }, time);
             }).promise();
         };
 
-    asyncTest("Can go to destination", function() {
+    asyncTest("Can go to destination", function () {
         var result,
             hash = browser.location.hash.substr(1);
 
@@ -49,7 +48,7 @@
         result = go("somewhere2?a=b");
         strictEqual(result, true);
         strictEqual(current().virtualPath, "somewhere2");
-        strictEqual(current().newHash, "somewhere2?a=b");
+        strictEqual(current().newHash, "!somewhere2?a=b");
         strictEqual(current().routeData, null);
 
         result = go({ b: "x", c: "y" });
@@ -71,7 +70,7 @@
 
         if (go(-1)) {
             strictEqual(current().virtualPath, "somewhere2");
-            strictEqual(current().newHash, "somewhere2?a=b");
+            strictEqual(current().newHash, "!somewhere2?a=b");
             strictEqual(current().routeData, null);
         }
 
@@ -99,10 +98,10 @@
         strictEqual(routeTable.length(), 0);
 
         cleanUpHash();
-        start();
+        start(); // delay(start);
     });
 
-    asyncTest("Can ignore query", function() {
+    asyncTest("Can ignore query", function () {
         var result;
 
         strictEqual(routeTable.length(), 0);
@@ -121,7 +120,7 @@
         result = go("somewhere2?a=b");
         strictEqual(result, true);
         strictEqual(current().virtualPath, "somewhere2");
-        strictEqual(current().newHash, "somewhere2?a=b");
+        strictEqual(current().newHash, "!somewhere2?a=b");
         strictEqual(current().routeData, null);
 
         result = go({ b: "x", c: "y" });
@@ -141,11 +140,11 @@
         delay(start);
     });
 
-    asyncTest("Can fire route handler", function() {
+    asyncTest("Can fire route handler", function () {
         var result,
             count = 0,
             runFail = true,
-            asyncCleanUp = function() {
+            asyncCleanUp = function () {
                 routeTable.clear();
                 strictEqual(routeTable.length(), 0);
                 cleanUpHash();
@@ -159,7 +158,7 @@
             virtualPaths = ["x/y/z", "1/m/n"],
             hashValues = ["!x/y/z", "!1/m/n?d=dd"];
 
-        jsMVC.on("fail", function() {
+        jsMVC.on("fail", function () {
             if (!runFail) {
                 return;
             }
@@ -169,7 +168,7 @@
 
         strictEqual(routeTable.length(), 0);
 
-        var route1 = new Route("{a}/{b}/{c}", {}, {}, {}, function(routeData, virtualPath) {
+        var route1 = new Route("{a}/{b}/{c}", {}, {}, {}, function (routeData, virtualPath) {
             deepEqual(routeData.values, routeValues[count]);
             deepEqual(routeData.dataTokens.event.virtualPath, virtualPath);
             strictEqual(virtualPath, virtualPaths[count]);
@@ -187,11 +186,11 @@
         strictEqual(result, true);
 
         // If changing hash fast, the timing of location.hash will be messed up.
-        delay(function() {
+        delay(function () {
             result = go({ a: "x", b: "y", c: "z" });
             strictEqual(result, true);
-        }).then(function() {
-            delay(function() {
+        }).then(function () {
+            delay(function () {
                 result = go({ a: 1, b: "m", c: "n", d: "dd" });
                 strictEqual(result, true);
             });

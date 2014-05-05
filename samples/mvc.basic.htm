@@ -4,40 +4,40 @@
     <title>jsMVC.net</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <script src="../build/jsMVC.js" type="text/javascript"></script>
-    <script src="../tools/jquery-1.9.1.js" type="text/javascript"></script>
+    <script src="../tools/jquery-1.11.0.js" type="text/javascript"></script>
     <style type="text/css">
         .app {
             position: absolute;
-            left: 0px;
-            right: 0px;
-            top: 0px;
-            bottom: 0px;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
         }
 
         .app-header {
             position: absolute;
-            left: 0px;
-            right: 0px;
-            top: 0px;
+            left: 0;
+            right: 0;
+            top: 0;
             height: 100px;
             background: #EEEEEE;
         }
 
         .app-aside {
             position: absolute;
-            left: 0px;
+            left: 0;
             width: 300px;
             top: 100px;
-            bottom: 0px;
+            bottom: 0;
             background: #EEEEBB;
         }
 
         .app-article {
             position: absolute;
             left: 300px;
-            right: 0px;
+            right: 0;
             top: 100px;
-            bottom: 0px;
+            bottom: 0;
         }
 
         .app-template {
@@ -45,31 +45,32 @@
         }
     </style>
     <script type="text/javascript">
-        (function(global, jsMVC, undefined) {
-            
+        (function (global, jsMVC, undefined) {
+
             jsMVC.Route({
                 id: "default",
                 url: "{controller}/{action}/{*id}",
                 defaults: {
-                    controller: "home", // "" -> "home" -> "home/index" 
+                    controller: "home", // "" -> "home" -> "home/index"
                     action: "index", // "home" -> "home/index"
                     id: undefined
                 }
             });
 
-            jsMVC.event.view = function(event, parts) {
+            jsMVC.event.view = function (event, parts) {
                 $("#navigation").empty().html(parts.navigation);
                 $("#article").empty().html(parts.article);
             };
 
-            jsMVC.event.error = function(event, status) {
+            jsMVC.event.error = function (event, status) {
+                event.status = status;
                 throw new Error(status);
             };
 
             jsMVC.Controller({
                 id: "home",
                 actions: {
-                    index: function(event) {
+                    index: function (event) {
                         event.view(event, {
                             navigation: "Home",
                             article: "This is the list of products."
@@ -81,17 +82,17 @@
             jsMVC.Controller({
                 id: "product",
                 actions: {
-                    index: function(event) {
+                    index: function (event) {
                         event.getAction("list").execute(event);
                     },
-                    list: function(event) {
+                    list: function (event) {
                         event.view(event, {
                             navigation: "Home > Products",
                             article: "This is the list of products."
                         });
                     },
 
-                    item: function(event) { // {controller}/{action}/{id} <-> product/item/4
+                    item: function (event) { // {controller}/{action}/{id} <-> product/item/4
                         var id = parseInt(event.routeData.values.id);
                         if (isNaN(id) || id < 0 || id > 5) {
                             event.error(event, jsMVC.status.notFound);
@@ -108,7 +109,7 @@
             jsMVC.Controller({
                 id: "user",
                 actions: {
-                    logOn: function(event) {
+                    logOn: function (event) {
                         event.view(event, {
                             navigation: "Home > Log On",
                             article: "This is the log on page."
@@ -118,21 +119,22 @@
             });
 
             jsMVC.Filter({
-                error: function(event) {
+                error: function (event) {
                     var message;
                     if (event.status === 404 || parseInt(event.message) === 404) {
                         message = "The requested page is not found:(";
                     } else {
-                        message = "The request cannot be processed:(";
+                        message = event.error || "The request cannot be processed:(";
                     }
                     event.view(event, {
                         navigation: "Home > Error",
                         article: message
                     });
+                    event.handleError();
                 }
             });
 
-            $(jsMVC.ready);
+            $(jsMVC);
 
         })(this, this.jsMVC);
 

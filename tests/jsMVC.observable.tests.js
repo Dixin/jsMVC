@@ -1,7 +1,7 @@
 ﻿/// <reference path="../source/_references.js"/>
 /// <reference path="../tools/_references.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     QUnit.module("jsMVC.observable");
@@ -75,25 +75,25 @@
         equal(count, 4);
         equal(person.length(), 4);
     });
-    
-    test("Set identical value will not fire change event", function() {
+
+    test("Set identical value will not fire change event", function () {
         var count = 0;
 
         var person = Observable({
             firstName: "A",
             lastName: "B",
             age: 28
-        }).add("fullName", function(firstName, lastName) {
+        }).add("fullName", function (firstName, lastName) {
             return firstName + " " + lastName;
-        }, ["firstName", "lastName"]).on(function(firstName) {
+        }, ["firstName", "lastName"]).on(function (firstName) {
             equal(firstName, "C");
             count++;
             equal(count, 2);
-        }, "firstName").on("change", function(lastName) {
+        }, "firstName").on("change", function (lastName) {
             equal(lastName, "D");
             count++;
             equal(count, 4);
-        }, "lastName").on(function(fullName) {
+        }, "lastName").on(function (fullName) {
             ok(fullName === "C B" || fullName === "C D");
             count++;
         }, "fullName");

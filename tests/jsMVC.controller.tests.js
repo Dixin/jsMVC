@@ -1,28 +1,28 @@
 ﻿/// <reference path="../tools/_references.js"/>
 /// <reference path="../source/_references.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     QUnit.module("jsMVC.controller");
 
-    var noop = function() {
+    var noop = function () {
     },
         $ = browser ? browser.jQuery : node("../tools/node_modules/jquery-deferred"),
-        delay = function(callback) {
-            return $.Deferred(function(deferred, time) {
+        delay = function (callback) {
+            return $.Deferred(function (deferred, time) {
                 time = time || 110;
-                setTimeout(function() {
+                setTimeout(function () {
                     callback();
                     deferred.resolve();
                 }, time);
             }).promise();
         },
-        cleanUpHash = function() {
+        cleanUpHash = function () {
             browser.location.hash = "";
         };
 
-    test("Can map mvc route.", function() {
+    test("Can map mvc route.", function () {
         strictEqual(jsMVC.routeTable.length(), 0);
         var route1 = jsMVC.Route({
             id: "r1",
@@ -48,7 +48,7 @@
         strictEqual(jsMVC.routeTable.length(), 0);
     });
 
-    test("Can create area.", function() {
+    test("Can create area.", function () {
         var result;
         result = jsMVC.Area({
             id: "area1"
@@ -81,7 +81,7 @@
         }
     });
 
-    test("Can map route on area.", function() {
+    test("Can map route on area.", function () {
         strictEqual(jsMVC.routeTable.length(), 0);
         var route1 = jsMVC.Area({
             id: "area11"
@@ -110,7 +110,7 @@
         strictEqual(jsMVC.routeTable.length(), 0);
     });
 
-    asyncTest("Can create and invoke controller.", 23, function() {
+    asyncTest("Can create and invoke controller.", 23, function () {
         var count = 0;
 
         strictEqual(jsMVC.routeTable.length(), 0);
@@ -118,11 +118,11 @@
         var controller1 = jsMVC.Controller({
             id: "c1",
             actions: {
-                a1: function() {
+                a1: function () {
                     count++;
                     strictEqual(count, 1);
                 },
-                a2: function() {
+                a2: function () {
                     count++;
                     strictEqual(count, 2);
                 }
@@ -140,11 +140,11 @@
         var controller2 = jsMVC.Controller({
             id: "c2",
             actions: {
-                a1: function() {
+                a1: function () {
                     count++;
                     strictEqual(count, 4);
                     return {
-                        execute: function() {
+                        execute: function () {
                             jsMVC.routeTable.clear();
                             strictEqual(jsMVC.routeTable.length(), 0);
                             if (browser) {
@@ -154,7 +154,7 @@
                         }
                     };
                 },
-                a2: function() {
+                a2: function () {
                     count++;
                     strictEqual(count, 3);
                 }
@@ -176,27 +176,27 @@
 
         strictEqual(jsMVC.routeTable.get("r1"), route);
 
-        delay(function() {
+        delay(function () {
             jsMVC.go({
                 controller: "c1",
                 action: "a1"
             });
-        }).then(function() {
-            return delay(function() {
+        }).then(function () {
+            return delay(function () {
                 jsMVC.go({
                     controller: "c1",
                     action: "a2"
                 });
             });
-        }).then(function() {
-            return delay(function() {
+        }).then(function () {
+            return delay(function () {
                 jsMVC.go({
                     controller: "c2",
                     action: "a2"
                 });
             });
-        }).then(function() {
-            return delay(function() {
+        }).then(function () {
+            return delay(function () {
                 jsMVC.go({
                     controller: "c2",
                     action: "a1"
@@ -204,8 +204,8 @@
             });
         });
     });
-    
-    asyncTest("Can create and invoke controller on area.", 2, function() {
+
+    asyncTest("Can create and invoke controller on area.", 2, function () {
         strictEqual(jsMVC.routeTable.length(), 0);
 
         var area = jsMVC.Area({
@@ -223,7 +223,7 @@
         });
         var a111 = c11.Action({
             id: "a111",
-            execute: function() {
+            execute: function () {
                 jsMVC.routeTable.clear();
                 strictEqual(jsMVC.routeTable.length(), 0);
                 if (browser) {
@@ -238,12 +238,12 @@
             region: "us",
             controller: "c11",
             action: "a111"
-        }, function(route) {
+        }, function (route) {
             return route.dataTokens.area === "area111";
         });
     });
-    
-    asyncTest("Can execute filter.", 4, function() {
+
+    asyncTest("Can execute filter.", 4, function () {
         var count = 0;
         var run = false;
         strictEqual(jsMVC.routeTable.length(), 0);
@@ -256,7 +256,7 @@
             }
         });
         jsMVC.Filter({
-            error: function() {
+            error: function () {
                 if (!run) {
                     return {
                         execute: noop
@@ -279,20 +279,20 @@
         jsMVC.Controller({
             id: "c1111",
             actions: {
-                a1111: function() {
+                a1111: function () {
                     count++;
                     strictEqual(count, 1);
                     run = true;
                 }
             }
         });
-        delay(function() {
+        delay(function () {
             jsMVC.go({
                 controller: "c1111",
                 action: "a1111"
             });
-        }).then(function() {
-            return delay(function() {
+        }).then(function () {
+            return delay(function () {
                 jsMVC.go({
                     controller: "c1111",
                     action: "a2222"
@@ -301,7 +301,7 @@
         });
     });
 
-    test("Can config MVC.", function() {
+    test("Can config MVC.", function () {
         strictEqual(jsMVC.routeTable.length(), 0);
 
         jsMVC.config({

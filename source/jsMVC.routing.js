@@ -1,7 +1,7 @@
 ﻿/// <reference path="jsMVC.js"/>
 /// <reference path="jsMVC._.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     // Imports.
@@ -9,7 +9,7 @@
         _ = jsMVC._,
         noop = _.noop,
         error = _.error,
-        forEachKey = _.forEachObjectKey,
+        forEachKey = _.forEachKey,
         some = _.some,
         isString = _.isString,
         isFunction = _.isFunction,
@@ -28,7 +28,7 @@
         doubleClosingFlag = "}}",
         emptyString = "",
         // Route parser.
-        getSegmentLiteral = function(segmentLiteral) {
+        getSegmentLiteral = function (segmentLiteral) {
             // Scan for errant single { and } and convert double {{ to { and double }} to }
             // First we eliminate all escaped braces and then check if any other braces are remaining
             var newLiteral = segmentLiteral.replace(doubleOpeningFlag, emptyString).replace(doubleClosingFlag, emptyString);
@@ -38,7 +38,7 @@
             // If it's a valid format, we unescape the braces
             return segmentLiteral.replace(doubleOpeningFlag, openingFlag).replace(doubleClosingFlag, closingFlag);
         },
-        isParameterNameValid = function(parameterName) {
+        isParameterNameValid = function (parameterName) {
             var index,
                 character;
             if (parameterName.length === 0) {
@@ -52,7 +52,7 @@
             }
             return true;
         },
-        getIndexOfFirstOpenParameter = function(segment, startIndex) {
+        getIndexOfFirstOpenParameter = function (segment, startIndex) {
             // Find the first unescaped open brace
             while (true) {
                 startIndex = segment.indexOf(openingFlag, startIndex);
@@ -74,7 +74,7 @@
                 startIndex += 2;
             }
         },
-        ParameterSubsegment = function(parameterName) {
+        ParameterSubsegment = function (parameterName) {
             this.isCatchAll = false;
             if (parameterName.charAt(0) === catchAllFlag) {
                 parameterName = parameterName.substr(1);
@@ -84,7 +84,7 @@
             this.type = parameterType;
             this.value = parameterName;
         },
-        getUrlSubsegments = function(part) {
+        getUrlSubsegments = function (part) {
             var startIndex = 0,
                 pathSubsegments = [],
                 nextParameterStart,
@@ -133,7 +133,7 @@
 
             return pathSubsegments;
         },
-        getUrlParts = function(url) {
+        getUrlParts = function (url) {
             var parts = [],
                 currentIndex,
                 indexOfNextSeparator,
@@ -165,7 +165,7 @@
 
             return parts;
         },
-        getUrlSegments = function(urlParts) {
+        getUrlSegments = function (urlParts) {
             var pathSegments = [],
                 index,
                 pathSegment,
@@ -189,12 +189,12 @@
             }
             return pathSegments;
         },
-        isSegmentCatchAll = function(segment) {
-            return some(segment.value, function(subsegment) {
+        isSegmentCatchAll = function (segment) {
+            return some(segment.value, function (subsegment) {
                 return subsegment.type === parameterType && subsegment.isCatchAll;
             });
         },
-        isUrlSubsegmentsValid = function(pathSubsegments, usedParameterNames) {
+        isUrlSubsegmentsValid = function (pathSubsegments, usedParameterNames) {
             var segmentContainsCatchAll = false,
                 previousSegmentType,
                 index,
@@ -242,10 +242,10 @@
 
             return true;
         },
-        isParameterSubsegmentCatchAll = function(subsegment) {
+        isParameterSubsegmentCatchAll = function (subsegment) {
             return subsegment.isCatchAll === true;
         },
-        isUrlPartsValid = function(parts) {
+        isUrlPartsValid = function (parts) {
             var usedParameterNames = {},
                 isPreviousPartSeparator = null,
                 foundCatchAllParameter = false,
@@ -292,7 +292,7 @@
             }
             return true;
         },
-        getParsedSegments = function(routeUrl) {
+        getParsedSegments = function (routeUrl) {
             var urlParts,
                 pathSegments;
             if (!routeUrl) {
@@ -314,7 +314,7 @@
         // /Route parser.
 
         // RouteValueDictionary.
-        getRouteValues = function(values) {
+        getRouteValues = function (values) {
             var routeValues;
             if (!values) {
                 return {};
@@ -323,7 +323,7 @@
                 error("'values' must be plain object.");
             }
             routeValues = {};
-            forEachKey(values, function(key, value) {
+            forEachKey(values, function (key, value) {
                 key = key.toLowerCase();
                 if (nativeHasOwn.call(routeValues, key)) {
                     error("Keys of 'values' must be case-insensitively unique.");
@@ -335,7 +335,7 @@
         // /RouteValueDictionary.
 
         // Parsed route.
-        matchCatchAllSegment = function(contentPathSegment, remainingRequestSegments, defaultValues, matchedValues) {
+        matchCatchAllSegment = function (contentPathSegment, remainingRequestSegments, defaultValues, matchedValues) {
             var remainingRequest = remainingRequestSegments.join(emptyString),
                 catchAllSubsegment = contentPathSegment.value[0],
                 catchAllValue;
@@ -347,7 +347,7 @@
             }
             matchedValues[catchAllSubsegment.value] = catchAllValue;
         },
-        matchContentSegment = function(routeSegment, requestPathSegment, defaultValues, matchedValues) {
+        matchContentSegment = function (routeSegment, requestPathSegment, defaultValues, matchedValues) {
             if (!requestPathSegment) {
                 // If there's no data to parse, we must have exactly one parameter segment and no other segments - otherwise no match
 
@@ -476,7 +476,7 @@
             // This check is related to the check we do earlier in this function for LiteralSubsegments.
             return (lastIndex === 0) || (routeSegment.value[0] && routeSegment.value[0].type === "parameter");
         },
-        matchSegments = function(pathSegments, virtualPath, defaultValues) {
+        matchSegments = function (pathSegments, virtualPath, defaultValues) {
             var requestPathSegments = getUrlParts(virtualPath);
 
             if (!defaultValues) {
@@ -543,7 +543,7 @@
 
             // Copy all remaining default values to the route data
             if (defaultValues !== null) {
-                forEachKey(defaultValues, function(defaultKey, defaultValue) {
+                forEachKey(defaultValues, function (defaultKey, defaultValue) {
                     if (!nativeHasOwn.call(matchedValues, defaultKey)) {
                         matchedValues[defaultKey] = defaultValue;
                     }
@@ -552,7 +552,7 @@
 
             return matchedValues;
         },
-        forEachParameterSubsegment = function(pathSegments, callback) {
+        forEachParameterSubsegment = function (pathSegments, callback) {
             for (var i = 0; i < pathSegments.length; i++) {
                 var pathSegment = pathSegments[i];
 
@@ -587,10 +587,10 @@
 
             return true;
         },
-        getParameterSubsegment = function(pathSegments, parameterName) {
+        getParameterSubsegment = function (pathSegments, parameterName) {
             var foundParameterSubsegment = null;
 
-            forEachParameterSubsegment(pathSegments, function(parameterSubsegment) {
+            forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
                 if (parameterName === parameterSubsegment.value) {
                     foundParameterSubsegment = parameterSubsegment;
                     return false;
@@ -601,7 +601,7 @@
 
             return foundParameterSubsegment;
         },
-        isParameterRequired = function(parameterSubsegment, defaultValues) {
+        isParameterRequired = function (parameterSubsegment, defaultValues) {
             if (parameterSubsegment.isCatchAll) {
                 return {
                     isRequired: false,
@@ -613,13 +613,13 @@
                 defaultValue: defaultValues[parameterSubsegment.value]
             };
         },
-        isRoutePartNonEmpty = function(routePart) {
+        isRoutePartNonEmpty = function (routePart) {
             if (isString(routePart)) {
                 return routePart.length > 0;
             }
             return !!routePart;
         },
-        areRoutePartsEqual = function(a, b) {
+        areRoutePartsEqual = function (a, b) {
             if (isString(a) && isString(b)) {
                 // For strings do a case-insensitive comparison
                 return a === b;
@@ -631,13 +631,13 @@
             // At least one of them is null or undefined. Return true if they both are
             return a === b;
         },
-        encodeUrl = browser ? function(url) {
+        encodeUrl = browser ? function (url) {
             return url; // For browser hash, no need to encode.
         } : encodeURIComponent, // Encode for server side.
-        escapeUrlDataString = browser ? function(value) {
+        escapeUrlDataString = browser ? function (value) {
             return value; // For browser hash, no need to escape.
         } : node("querystring").escape, // Escape for server side.
-        bind = function(pathSegments, currentValues, values, defaultValues, constraints) {
+        bind = function (pathSegments, currentValues, values, defaultValues, constraints) {
             currentValues = currentValues || {};
             values = values || {};
             defaultValues = defaultValues || {};
@@ -647,7 +647,7 @@
 
             // Keep track of which new values have been used
             var unusedNewValues = {};
-            forEachKey(values, function(key) {
+            forEachKey(values, function (key) {
                 unusedNewValues[key] = null;
             });
 
@@ -657,7 +657,7 @@
             // If the URL had ordered parameters a="1", b="2", c="3" and the new values
             // specified that b="9", then we need to invalidate everything after it. The new
             // values should then be a="1", b="9", c=<no value>.
-            forEachParameterSubsegment(pathSegments, function(parameterSubsegment) {
+            forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
                 // If it's a parameter subsegment, examine the current value to see if it matches the new value
                 var parameterName = parameterSubsegment.value;
 
@@ -691,7 +691,7 @@
             });
 
             // Add all remaining new values to the list of values we will use for URL generation
-            forEachKey(values, function(newKey, newValue) {
+            forEachKey(values, function (newKey, newValue) {
                 if (isRoutePartNonEmpty(newValue)) {
                     if (!nativeHasOwn.call(acceptedValues, newKey)) {
                         acceptedValues[newKey] = newValue;
@@ -700,7 +700,7 @@
             });
 
             // Add all current values that aren't in the URL at all
-            forEachKey(currentValues, function(currentKey, currentValue) {
+            forEachKey(currentValues, function (currentKey, currentValue) {
                 var parameterName2 = currentKey;
                 if (!nativeHasOwn.call(acceptedValues, parameterName2)) {
                     var parameterSubsegment2 = getParameterSubsegment(pathSegments, parameterName2);
@@ -711,7 +711,7 @@
             });
 
             // Add all remaining default values from the route to the list of values we will use for URL generation
-            forEachParameterSubsegment(pathSegments, function(parameterSubsegment) {
+            forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
                 if (!nativeHasOwn.call(acceptedValues, parameterSubsegment.value)) {
                     var result = isParameterRequired(parameterSubsegment, defaultValues);
                     if (!result.isRequired) {
@@ -725,7 +725,7 @@
             });
 
             // All required parameters in this URL must have values from somewhere (i.e. the accepted values)
-            var hasAllRequiredValues = forEachParameterSubsegment(pathSegments, function(parameterSubsegment) {
+            var hasAllRequiredValues = forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
                 var result = isParameterRequired(parameterSubsegment, defaultValues);
                 if (result.isRequired) {
                     if (!nativeHasOwn.call(acceptedValues, parameterSubsegment.value)) {
@@ -744,23 +744,23 @@
 
             // All other default values must match if they are explicitly defined in the new values
             var otherDefaultValues = getRouteValues(defaultValues);
-            forEachParameterSubsegment(pathSegments, function(parameterSubsegment) {
+            forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
                 delete otherDefaultValues[parameterSubsegment.value];
                 return true;
             });
 
             var shouldReturnNull = false;
-            forEachKey(otherDefaultValues, function(defaultKey, defaultValue) {
+            forEachKey(otherDefaultValues, function (defaultKey, defaultValue) {
                 if (nativeHasOwn.call(values, defaultKey)) {
                     delete unusedNewValues[defaultKey];
                     if (!areRoutePartsEqual(values[defaultKey], defaultValue)) {
                         // If there is a non-parameterized value in the route and there is a
                         // new value for it and it doesn't match, this route won't match.
                         shouldReturnNull = true;
-                        return true;
+                        return false;
                     }
                 }
-                return false;
+                return true;
             });
             if (shouldReturnNull) {
                 return null;
@@ -885,7 +885,7 @@
                 // If there are any constraints, mark all the keys as being used so that we don't
                 // generate query string items for custom constraints that don't appear as parameters
                 // in the URL format.
-                forEachKey(constraints, function(constraintKey) {
+                forEachKey(constraints, function (constraintKey) {
                     delete unusedNewValues[constraintKey];
                 });
             }
@@ -894,7 +894,7 @@
             if (unusedNewValues) {
                 // Generate the query string
                 var firstParam = true;
-                forEachKey(unusedNewValues, function(unusedNewValue) {
+                forEachKey(unusedNewValues, function (unusedNewValue) {
                     if (nativeHasOwn.call(acceptedValues, unusedNewValue)) {
                         url += firstParam ? '?' : '&';
                         firstParam = false;
@@ -913,7 +913,7 @@
         // /Parsed route.
 
         // RouteData.
-        RouteData = function(route, routeHandler, values, dataTokens) {
+        RouteData = function (route, routeHandler, values, dataTokens) {
             this.route = route;
             this.routeHandler = routeHandler;
             this.values = values;
@@ -922,7 +922,7 @@
         // /RouteData.
 
         // VirtualPathData.
-        VirtualPathData = function(route, virtualPath, dataTokens /* optional */) {
+        VirtualPathData = function (route, virtualPath, dataTokens /* optional */) {
             this.route = route;
             this.virtualPath = virtualPath;
             this.dataTokens = dataTokens;
@@ -930,7 +930,7 @@
         // /VirtualPathData.
 
         // Route.
-        processConstraint = function(route, constraint, virtualPath, parameterName, values, isIncomingRequest) {
+        processConstraint = function (route, constraint, virtualPath, parameterName, values, isIncomingRequest) {
             var parameterValue = values[parameterName];
             if (isFunction(constraint)) {
                 return constraint(parameterValue, virtualPath, route, parameterName, values, isIncomingRequest);
@@ -945,19 +945,19 @@
             var constraintsRegEx = new RegExp("^(" + constraint + ")$", "i");
             return parameterValueString.match(constraintsRegEx);
         },
-        processConstraints = function(route, constraints, virtualPath, values, isIncomingRequest) {
+        processConstraints = function (route, constraints, virtualPath, values, isIncomingRequest) {
             var result = true;
-            forEachKey(constraints, function(key, value) {
+            forEachKey(constraints, function (key, value) {
                 if (!processConstraint(route, value, virtualPath, key, values, isIncomingRequest)) {
                     result = false;
-                    return true; // break;
+                    return false; // break;
                 }
-                return false;
+                return true;
             });
             return result;
         },
-        Route = (function() {
-            var constructor = function(url, defaults /* optional */, constraints, dataTokens, routeHandler, name) {
+        Route = (function () {
+            var constructor = function (url, defaults /* optional */, constraints, dataTokens, routeHandler, name) {
                 if (!isString(url)) {
                     error("'url' must be valid.");
                 }
@@ -986,7 +986,7 @@
             constructor.prototype = {
                 constructor: constructor,
 
-                getVirtualPathData: function(routeValues, currentRouteValues /* optional */) {
+                getVirtualPathData: function (routeValues, currentRouteValues /* optional */) {
                     routeValues = getRouteValues(routeValues);
                     currentRouteValues = getRouteValues(currentRouteValues);
                     var result = bind(this._segments, currentRouteValues, routeValues, this.defaults, this.constraints);
@@ -1004,7 +1004,7 @@
                     return virtualPathData;
                 },
 
-                getRouteData: function(virtualPath) {
+                getRouteData: function (virtualPath) {
                     if (!isString(virtualPath)) {
                         error("'virtualPath' must be string.");
                     }
@@ -1033,15 +1033,15 @@
         // /Route.
 
         // RouteCollection.
-        IgnoreRoute = (function() {
-            var constructor = function(url, constraints  /* optional */) {
+        IgnoreRoute = (function () {
+            var constructor = function (url, constraints  /* optional */) {
                 Route.call(this, url, {}, constraints, {}, noop);
             };
 
             constructor.prototype = {
                 constructor: constructor,
                 // routeData.routeHandler is always noop.
-                getVirtualPathData: function() {
+                getVirtualPathData: function () {
                     return null;
                 },
 
@@ -1050,11 +1050,11 @@
 
             return constructor;
         }()),
-        RouteTable = function() {
+        RouteTable = function () {
             var namedRoutes = {},
                 allRoutes = [];
 
-            this.getRouteData = function(virtualPath) {
+            this.getRouteData = function (virtualPath) {
                 if (!isString(virtualPath)) {
                     error("'virtualPath' must be string.");
                 }
@@ -1069,7 +1069,7 @@
                 return null;
             };
 
-            this.getVirtualPathData = function(routeValues, currentRouteValues, filter /* optional */) {
+            this.getVirtualPathData = function (routeValues, currentRouteValues, filter /* optional */) {
                 if (filter && !isFunction(filter)) {
                     error("'filter' must be function.");
                 }
@@ -1087,7 +1087,7 @@
                 return null;
             };
 
-            this.push = function(route) {
+            this.push = function (route) {
                 if (!(route.constructor === Route || route.constructor === IgnoreRoute)) {
                     error("'route' must be valid.");
                 }
@@ -1102,7 +1102,7 @@
                 return route;
             };
 
-            this.get = function(key) {
+            this.get = function (key) {
                 // Key should be either name or index.
                 if (isString(key)) {
                     var lowerCaseKey = key.toLowerCase();
@@ -1111,20 +1111,20 @@
                 return allRoutes[key];
             };
 
-            this.ignore = function(url, constraints /* optional */) {
+            this.ignore = function (url, constraints /* optional */) {
                 return this.push(new IgnoreRoute(url, constraints));
             };
 
-            this.clear = function() {
+            this.clear = function () {
                 namedRoutes = {};
                 allRoutes = [];
             };
 
-            this.length = function() {
+            this.length = function () {
                 return allRoutes.length;
             };
 
-            this.Route = function(url, defaults /* optional */, constraints, dataTokens, routeHandler, name) {
+            this.Route = function (url, defaults /* optional */, constraints, dataTokens, routeHandler, name) {
                 return new Route(url, defaults /* optional */, constraints, dataTokens, routeHandler, name);
             };
         };
@@ -1133,18 +1133,16 @@
     // Exports.
     jsMVC.routeTable = new RouteTable();
 
-    copyProps(_, {
-        getUrlParts: getUrlParts,
-        getSegmentLiteral: getSegmentLiteral,
-        getIndexOfFirstOpenParameter: getIndexOfFirstOpenParameter,
-        getUrlSubsegments: getUrlSubsegments,
-        isUrlSubsegmentsValid: isUrlSubsegmentsValid,
-        isUrlPartsValid: isUrlPartsValid,
-        matchSegments: matchSegments,
-        getParsedSegments: getParsedSegments,
-        forEachParameterSubsegment: forEachParameterSubsegment,
-        encodeUrl: encodeUrl,
-        escapeUrlDataString: escapeUrlDataString
-    });
+    _.getUrlParts = getUrlParts;
+    _.getSegmentLiteral = getSegmentLiteral;
+    _.getIndexOfFirstOpenParameter = getIndexOfFirstOpenParameter;
+    _.getUrlSubsegments = getUrlSubsegments;
+    _.isUrlSubsegmentsValid = isUrlSubsegmentsValid;
+    _.isUrlPartsValid = isUrlPartsValid;
+    _.matchSegments = matchSegments;
+    _.getParsedSegments = getParsedSegments;
+    _.forEachParameterSubsegment = forEachParameterSubsegment;
+    _.encodeUrl = encodeUrl;
+    _.escapeUrlDataString = escapeUrlDataString;
 
 }(this.window, !this.window && require, this.jsMVC || exports));

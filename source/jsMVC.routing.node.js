@@ -2,7 +2,7 @@
 /// <reference path="jsMVC._.js"/>
 /// <reference path="jsMVC.routing.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     if (browser) {
@@ -26,7 +26,7 @@
         prefix = "/",
         prefixLength = prefix.length,
         server,
-        normalizeEvent = function(options) {
+        normalizeEvent = function (options) {
             var event = new Event(),
                 request,
                 requestMethod,
@@ -44,7 +44,7 @@
                 requestedUrl.protocol = request.connection.encrypted ? "https" : "http";
                 requestedUrl.host = request.headers.host;
 
-                referrerUrl = request.headers['referer'] || request.headers['Referer'];
+                referrerUrl = request.headers.referer || request.headers.Referer;
             } else { // Get info from options.
                 // If options.url is provided, use options.url and ignore options.virtualPath.
                 requestMethod = options.type;
@@ -62,7 +62,7 @@
             }
 
             referrerUrl = referrerUrl !== undefined ? url.parse(referrerUrl) : {};
-            
+
             virtualPath = requestedUrl.pathname;
             if (virtualPath && virtualPath.substr(0, prefixLength) === prefix) {
                 virtualPath = virtualPath.substr(prefixLength); // Remove starting "/".
@@ -85,10 +85,10 @@
                 response: options.response
             });
         },
-        listen = function(callback) {
+        listen = function (callback) {
             var serverDomain = domain.create();
-            serverDomain.run(function() {
-                server = http.createServer().on("request", function(request, response) {
+            serverDomain.run(function () {
+                server = http.createServer().on("request", function (request, response) {
                     var requestDomian = domain.create(),
                         event = normalizeEvent({
                             request: request,
@@ -98,12 +98,12 @@
                         });
                     requestDomian.add(request);
                     requestDomian.add(response);
-                    requestDomian.on("error", function(error) {
+                    requestDomian.on("error", function (error) {
                         try {
                             event.status = status.internalError;
                             event.error = error;
                             trigger("fail", event);
-                            response.on("close", function() {
+                            response.on("close", function () {
                                 requestDomian.dispose();
                             });
                         } catch (err) {
@@ -119,7 +119,7 @@
             });
         };
 
-    jsMVC.go = function(destination, options) {
+    jsMVC.go = function (destination, options) {
         var virtualPathData;
         options = options || {};
         switch (type(destination)) {
@@ -141,6 +141,7 @@
                 return false;
         }
     };
+
     jsMVC.current = normalizeEvent;
     _.listen = listen;
 

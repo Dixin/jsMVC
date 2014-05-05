@@ -7,7 +7,7 @@
 // Copyright (C) 2013 Dixin Yan http://weblogs.asp.net/dixin
 // Released under the MIT license
 
-(function(browser, node, undefined) {
+(function (browser, node, undefined) {
     "use strict";
 
     // Imports.
@@ -15,14 +15,15 @@
         previous = browser && browser.jsMVC,
         jQuery = browser && browser.jQuery,
         // Local variables.
-        jsMVC = function(callback) {
-            return jsMVC.ready(callback);
+        jsMVC = function (callback) {
+            return jsMVC.config(callback); // jsMVC() is equal to jsMVC.config().
         };
 
     jsMVC.version = 0.8;
 
-    jsMVC.noConflict = function() {
+    jsMVC.noConflict = function () {
         if (browser && browser.jsMVC === jsMVC) {
+            // Old value of window.jsMVC is saved. Calling noConflict() restores it.
             browser.jsMVC = previous;
         }
         return jsMVC;
@@ -30,7 +31,7 @@
 
     // Define AMD module. http://requirejs.org/docs/whyamd.html
     if (typeof define === "function" && define.amd) {
-        define("jsMVC", [], function() {
+        define("jsMVC", [], function () {
             return jsMVC;
         });
     }
@@ -38,7 +39,7 @@
     // Define jQuery plugin. http://docs.jquery.com/Plugins/Authoring#Namespacing
     if (jQuery) {
         // jQuery.namespace(method, args), not jQuery.namespace.method(args).
-        jQuery.jsMVC = function(name) {
+        jQuery.jsMVC = function (name) {
             var prop = jsMVC[name];
             if (prop) {
                 return prop.apply(undefined, nativeSilce.call(arguments, 1));
@@ -51,7 +52,7 @@
     if (browser) {
         browser.jsMVC = jsMVC;
     }
-    
+
     // Export to node.js. function (exports, require, module, __filename, __dirname) { }
     if (node) {
         exports = jsMVC;
@@ -63,7 +64,7 @@
 
 ﻿/// <reference path="jsMVC.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     // Imports.
@@ -75,14 +76,13 @@
         nativeReduceRight = Array.prototype.reduceRight,
         nativeIndexOf = Array.prototype.indexOf,
         // Local variables.
-        noop = function() {
+        noop = function () {
         },
-        error = function(message) {
+        error = function (message) {
             throw new Error(message);
         },
-        
         // Array helpers.
-        forEachItem = function(array, callback, context) {
+        forEachItem = function (array, callback, context) {
             // Array.prototype.forEach cannot break.
             var index,
                 length;
@@ -92,16 +92,16 @@
             length = array.length;
             for (index = 0; index < length; index++) {
                 if (nativeHasOwn.call(array, index)) {
-                    if (callback.call(context, array[index], index, array)) {
+                    if (callback.call(context, array[index], index, array) === false) {
                         break;
                     }
                 }
             }
             return array;
         },
-        map = nativeMap ? function(array, callback, context) {
+        map = nativeMap ? function (array, callback, context) {
             return nativeMap.call(array, callback, context);
-        } : function(array, callback, context) {
+        } : function (array, callback, context) {
             var index,
                 results = new Array(array.length);
             for (index = 0; index < results.length; index++) {
@@ -111,9 +111,9 @@
             }
             return results;
         },
-        reduceRight = nativeReduceRight ? function(array, callback, initial) {
+        reduceRight = nativeReduceRight ? function (array, callback, initial) {
             return nativeReduceRight.call(array, callback, initial);
-        } : function(array, callback, initial) {
+        } : function (array, callback, initial) {
             var length = array.length,
                 hasInitial = arguments.length > 2,
                 accumulator,
@@ -129,9 +129,9 @@
             }
             return accumulator;
         },
-        some = nativeSome ? function(array, callback, context) {
+        some = nativeSome ? function (array, callback, context) {
             return nativeSome.call(array, callback, context);
-        } : function(array, callback, context) {
+        } : function (array, callback, context) {
             var index,
                 length = array.length;
             for (index = 0; index < length; index++) {
@@ -141,9 +141,9 @@
             }
             return false;
         },
-        indexOf = nativeIndexOf ? function(array, item) {
+        indexOf = nativeIndexOf ? function (array, item) {
             return nativeIndexOf.call(array, item);
-        } : function(array, item) {
+        } : function (array, item) {
             var index,
                 length = array.length;
             for (index = 0; index < length; index++) {
@@ -153,7 +153,7 @@
             }
             return -1;
         },
-        values = function(array, keys) {
+        values = function (array, keys) {
             var index,
                 length = keys.length,
                 results = new Array(length);
@@ -162,7 +162,6 @@
             }
             return results;
         },
-        
         // Object helpers.
         hasKeyIgnoredBug = !({
             toString: null
@@ -179,14 +178,14 @@
         ],
         ignoredKeysLength = hasKeyIgnoredBug.length, // IE6
 
-        forEachKey = nativeKeys ? function(object, callback, context) {
+        forEachKey = nativeKeys ? function (object, callback, context) {
             if (!object) {
                 return;
             }
-            forEachItem(nativeKeys(object), function(key) {
+            forEachItem(nativeKeys(object), function (key) {
                 return callback.call(context, key, object[key], object);
             });
-        } : (hasKeyIgnoredBug ? function(object, callback, context) { // IE6
+        } : (hasKeyIgnoredBug ? function (object, callback, context) { // IE6
             // https//developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys
             var key,
                 index;
@@ -195,32 +194,30 @@
             }
             for (key in object) {
                 if (nativeHasOwn.call(object, key)) {
-                    if (callback.call(context, key, object[key], object)) {
+                    if (callback.call(context, key, object[key], object) === false) {
                         break;
                     }
                 }
             }
             for (index = 0; index < ignoredKeysLength; index++) {
                 key = ignoredKeys[index];
-                if (nativeHasOwn.call(object, key) && callback.call(context, key, object[key], object)) {
+                if (nativeHasOwn.call(object, key) && callback.call(context, key, object[key], object) === false) {
                     break;
                 }
             }
-        } : function(object, callback, context) {
+        } : function (object, callback, context) {
             var key;
             if (!object) {
                 return;
             }
             for (key in object) {
-                if (nativeHasOwn.call(object, key)) {
-                    if (callback.call(context, key, object[key], object)) {
-                        break;
-                    }
+                if (nativeHasOwn.call(object, key) && callback.call(context, key, object[key], object) === false) {
+                    break;
                 }
             }
         }),
-        copyProps = function(destination, source, canOverride) {
-            forEachKey(source, function(key, value) {
+        copyProps = function (destination, source, canOverride) {
+            forEachKey(source, function (key, value) {
                 if (!canOverride && (key in destination)) {
                     error("Key '" + key + "' must be unique.");
                 }
@@ -228,7 +225,7 @@
             });
             return destination;
         },
-        countKeys = function(object) {
+        countKeys = function (object) {
             var count = 0,
                 key;
             for (key in object) {
@@ -238,13 +235,12 @@
             }
             return count;
         },
-        
         // Type helpers.
-        typeMap = reduceRight(["Boolean", "Number", "String", "Function", "Array", "Date", "RegExp", "Object"], function(accumulator, item) {
+        typeMap = reduceRight(["Boolean", "Number", "String", "Function", "Array", "Date", "RegExp", "Object"], function (accumulator, item) {
             accumulator["[object " + item + "]"] = item.toLowerCase();
             return accumulator;
         }, {}),
-        type = function(value) {
+        type = function (value) {
             switch (value) {
                 case null:
                     return "null";
@@ -256,39 +252,89 @@
                     return typeMap[nativeToString.call(value)] || "object";
             }
         },
-        isString = function(value) {
+        isString = function (value) {
             return type(value) === "string";
         },
-        isFunction = function(value) {
+        isFunction = function (value) {
             return type(value) === "function";
         },
-        isObject = function(value) {
+        isObject = function (value) {
             return type(value) === "object";
         },
-        isInteger = function(value) {
+        isInteger = function (value) {
             return !isNaN(parseInt(value, 10)) && isFinite(value);
         },
-        isArray = Array.isArray || function(value) {
+        isArray = Array.isArray || function (value) {
             return type(value) === "array";
         },
-        isNumber = function(value) {
+        isNumber = function (value) {
             return type(value) === "number";
         },
-        isWindow = function(value) {
+        isWindow = function (value) {
             return value && value === value.window;
+        },
+        // Function group.
+        Functions = (function () {
+            var constructor = function () {
+                this.fns = [];
+            };
+
+            constructor.prototype = {
+                constructor: constructor,
+
+                push: function (fn) {
+                    if (!isFunction(fn)) {
+                        error("'callback' must be function.");
+                    }
+                    return this.fns.push(fn);
+                },
+
+                execute: function (context, args) {
+                    var isExecuted = false;
+                    forEachItem(this.fns, function (callback) {
+                        callback.apply(context, args); // Should not return.
+                        isExecuted = true;
+                    });
+                    return isExecuted;
+                },
+
+                remove: function (fn) {
+                    if (fn === undefined) {
+                        // Remove all items.
+                        this.fns = [];
+                    } else {
+                        forEachItem(this.fns, function (item, index, fns) {
+                            if (item === fn) {
+                                fns.splice(index, 1); // Remove item.
+                                return false; // break.
+                            }
+                            return true;
+                        });
+                    }
+                    return this.fns.length;
+                }
+            };
+
+            return constructor;
+        }()),
+        returnTrue = function () {
+            return true;
+        },
+        returnFalse = function () {
+            return false;
         };
 
     // Exports.
     jsMVC._ = {
         noop: noop,
         error: error,
-        forEachArrayItem: forEachItem,
+        forEachItem: forEachItem,
         indexOf: indexOf,
         some: some,
         reduceRight: reduceRight,
         map: map,
         getArrayValues: values,
-        forEachObjectKey: forEachKey,
+        forEachKey: forEachKey,
         copyProperties: copyProps,
         countKeys: countKeys,
         type: type,
@@ -298,7 +344,10 @@
         isInteger: isInteger,
         isNumber: isNumber,
         isArray: isArray,
-        isWindow: isWindow
+        isWindow: isWindow,
+        Functions: Functions,
+        returnTrue: returnTrue,
+        returnFalse: returnFalse
     };
 
 }(this.window, !this.window && require, this.jsMVC || exports));
@@ -306,71 +355,24 @@
 ﻿/// <reference path="jsMVC.js"/>
 /// <reference path="jsMVC._.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     var nativeSilce = Array.prototype.slice,
         _ = jsMVC._,
-        error = _.error,
-        forEachItem = _.forEachArrayItem,
-        isFunction = _.isFunction,
-        returnTrue = function() {
-            return true;
-        },
-        returnFalse = function() {
-            return false;
-        },
-        Callbacks = (function() {
-            var constructor = function() {
-                this.callbacks = [];
-            };
-
-            constructor.prototype = {
-                constructor: constructor,
-
-                push: function(callback) {
-                    if (!isFunction(callback)) {
-                        error("'callback' must be function.");
-                    }
-                    return this.callbacks.push(callback);
-                },
-
-                execute: function() {
-                    var args = arguments;
-                    forEachItem(this.callbacks, function(callback) {
-                        callback.apply(undefined, args);
-                    });
-                },
-
-                remove: function(callback) {
-                    if (callback === undefined) {
-                        // Remove all items.
-                        this.callbacks = [];
-                    } else {
-                        forEachItem(this.callbacks, function(item, index, callbacks) {
-                            if (item === callback) {
-                                callbacks.splice(index, 1); // Remove item.
-                                return true; // break.
-                            }
-                            return false;
-                        });
-                    }
-                    return this.callbacks.length;
-                }
-            };
-
-            return constructor;
-        }()),
+        Functions = _.Functions,
+        returnTrue = _.returnTrue,
+        returnFalse = _.returnFalse,
         eventCallbacks = {},
-        on = function(eventType, callback) {
+        on = function (eventType, callback) {
             var callbacks = eventCallbacks[eventType];
             if (!callbacks) {
-                callbacks = eventCallbacks[eventType] = new Callbacks();
+                callbacks = eventCallbacks[eventType] = new Functions();
             }
             callbacks.push(callback);
             return jsMVC;
         },
-        off = function(eventType, callback) {
+        off = function (eventType, callback) {
             var callbacks = eventCallbacks[eventType];
             if (callbacks) {
                 if (callbacks.remove(callback) === 0) {
@@ -378,30 +380,41 @@
                 }
             }
         },
-        trigger = function(eventType) {
+        trigger = function (eventType) {
             var callbacks = eventCallbacks[eventType];
             if (callbacks) {
-                callbacks.execute.apply(callbacks, nativeSilce.call(arguments, 1));
+                callbacks.execute(callbacks, nativeSilce.call(arguments, 1));
             }
         },
-        Event = (function() {
-            var constructor = function() {
+        Event = (function () {
+            var constructor = function () {
                 this.timeStamp = Date.now();
+                this.result = undefined;
             };
             constructor.prototype = {
                 constructor: constructor,
                 isDefaultPrevented: returnFalse,
                 isPropagationStopped: returnFalse,
-                preventDefault: function() {
+                isImmediatePropagationStopped: returnFalse,
+                isErrorHandled: returnFalse,
+                preventDefault: function () {
                     this.isDefaultPrevented = returnTrue;
                 },
-                stopPropagation: function() {
+                stopPropagation: function () {
                     this.isPropagationStopped = returnTrue;
+                    this.isImmediatePropagationStopped = returnTrue;
+                },
+                stopImmediatePropagation: function () {
+                    this.isImmediatePropagationStopped = returnTrue;
+                },
+                handleError: function () {
+                    this.isErrorHandled = returnTrue;
                 }
             };
             return constructor;
         }());
 
+    // Exports.
     jsMVC.event = Event.prototype,
     jsMVC.on = on;
     jsMVC.off = off,
@@ -413,7 +426,7 @@
 ﻿/// <reference path="jsMVC.js"/>
 /// <reference path="jsMVC._.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     // Imports.
@@ -421,7 +434,7 @@
         _ = jsMVC._,
         noop = _.noop,
         error = _.error,
-        forEachKey = _.forEachObjectKey,
+        forEachKey = _.forEachKey,
         some = _.some,
         isString = _.isString,
         isFunction = _.isFunction,
@@ -440,7 +453,7 @@
         doubleClosingFlag = "}}",
         emptyString = "",
         // Route parser.
-        getSegmentLiteral = function(segmentLiteral) {
+        getSegmentLiteral = function (segmentLiteral) {
             // Scan for errant single { and } and convert double {{ to { and double }} to }
             // First we eliminate all escaped braces and then check if any other braces are remaining
             var newLiteral = segmentLiteral.replace(doubleOpeningFlag, emptyString).replace(doubleClosingFlag, emptyString);
@@ -450,7 +463,7 @@
             // If it's a valid format, we unescape the braces
             return segmentLiteral.replace(doubleOpeningFlag, openingFlag).replace(doubleClosingFlag, closingFlag);
         },
-        isParameterNameValid = function(parameterName) {
+        isParameterNameValid = function (parameterName) {
             var index,
                 character;
             if (parameterName.length === 0) {
@@ -464,7 +477,7 @@
             }
             return true;
         },
-        getIndexOfFirstOpenParameter = function(segment, startIndex) {
+        getIndexOfFirstOpenParameter = function (segment, startIndex) {
             // Find the first unescaped open brace
             while (true) {
                 startIndex = segment.indexOf(openingFlag, startIndex);
@@ -486,7 +499,7 @@
                 startIndex += 2;
             }
         },
-        ParameterSubsegment = function(parameterName) {
+        ParameterSubsegment = function (parameterName) {
             this.isCatchAll = false;
             if (parameterName.charAt(0) === catchAllFlag) {
                 parameterName = parameterName.substr(1);
@@ -496,7 +509,7 @@
             this.type = parameterType;
             this.value = parameterName;
         },
-        getUrlSubsegments = function(part) {
+        getUrlSubsegments = function (part) {
             var startIndex = 0,
                 pathSubsegments = [],
                 nextParameterStart,
@@ -545,7 +558,7 @@
 
             return pathSubsegments;
         },
-        getUrlParts = function(url) {
+        getUrlParts = function (url) {
             var parts = [],
                 currentIndex,
                 indexOfNextSeparator,
@@ -577,7 +590,7 @@
 
             return parts;
         },
-        getUrlSegments = function(urlParts) {
+        getUrlSegments = function (urlParts) {
             var pathSegments = [],
                 index,
                 pathSegment,
@@ -601,12 +614,12 @@
             }
             return pathSegments;
         },
-        isSegmentCatchAll = function(segment) {
-            return some(segment.value, function(subsegment) {
+        isSegmentCatchAll = function (segment) {
+            return some(segment.value, function (subsegment) {
                 return subsegment.type === parameterType && subsegment.isCatchAll;
             });
         },
-        isUrlSubsegmentsValid = function(pathSubsegments, usedParameterNames) {
+        isUrlSubsegmentsValid = function (pathSubsegments, usedParameterNames) {
             var segmentContainsCatchAll = false,
                 previousSegmentType,
                 index,
@@ -654,10 +667,10 @@
 
             return true;
         },
-        isParameterSubsegmentCatchAll = function(subsegment) {
+        isParameterSubsegmentCatchAll = function (subsegment) {
             return subsegment.isCatchAll === true;
         },
-        isUrlPartsValid = function(parts) {
+        isUrlPartsValid = function (parts) {
             var usedParameterNames = {},
                 isPreviousPartSeparator = null,
                 foundCatchAllParameter = false,
@@ -704,7 +717,7 @@
             }
             return true;
         },
-        getParsedSegments = function(routeUrl) {
+        getParsedSegments = function (routeUrl) {
             var urlParts,
                 pathSegments;
             if (!routeUrl) {
@@ -726,7 +739,7 @@
         // /Route parser.
 
         // RouteValueDictionary.
-        getRouteValues = function(values) {
+        getRouteValues = function (values) {
             var routeValues;
             if (!values) {
                 return {};
@@ -735,7 +748,7 @@
                 error("'values' must be plain object.");
             }
             routeValues = {};
-            forEachKey(values, function(key, value) {
+            forEachKey(values, function (key, value) {
                 key = key.toLowerCase();
                 if (nativeHasOwn.call(routeValues, key)) {
                     error("Keys of 'values' must be case-insensitively unique.");
@@ -747,7 +760,7 @@
         // /RouteValueDictionary.
 
         // Parsed route.
-        matchCatchAllSegment = function(contentPathSegment, remainingRequestSegments, defaultValues, matchedValues) {
+        matchCatchAllSegment = function (contentPathSegment, remainingRequestSegments, defaultValues, matchedValues) {
             var remainingRequest = remainingRequestSegments.join(emptyString),
                 catchAllSubsegment = contentPathSegment.value[0],
                 catchAllValue;
@@ -759,7 +772,7 @@
             }
             matchedValues[catchAllSubsegment.value] = catchAllValue;
         },
-        matchContentSegment = function(routeSegment, requestPathSegment, defaultValues, matchedValues) {
+        matchContentSegment = function (routeSegment, requestPathSegment, defaultValues, matchedValues) {
             if (!requestPathSegment) {
                 // If there's no data to parse, we must have exactly one parameter segment and no other segments - otherwise no match
 
@@ -888,7 +901,7 @@
             // This check is related to the check we do earlier in this function for LiteralSubsegments.
             return (lastIndex === 0) || (routeSegment.value[0] && routeSegment.value[0].type === "parameter");
         },
-        matchSegments = function(pathSegments, virtualPath, defaultValues) {
+        matchSegments = function (pathSegments, virtualPath, defaultValues) {
             var requestPathSegments = getUrlParts(virtualPath);
 
             if (!defaultValues) {
@@ -955,7 +968,7 @@
 
             // Copy all remaining default values to the route data
             if (defaultValues !== null) {
-                forEachKey(defaultValues, function(defaultKey, defaultValue) {
+                forEachKey(defaultValues, function (defaultKey, defaultValue) {
                     if (!nativeHasOwn.call(matchedValues, defaultKey)) {
                         matchedValues[defaultKey] = defaultValue;
                     }
@@ -964,7 +977,7 @@
 
             return matchedValues;
         },
-        forEachParameterSubsegment = function(pathSegments, callback) {
+        forEachParameterSubsegment = function (pathSegments, callback) {
             for (var i = 0; i < pathSegments.length; i++) {
                 var pathSegment = pathSegments[i];
 
@@ -999,10 +1012,10 @@
 
             return true;
         },
-        getParameterSubsegment = function(pathSegments, parameterName) {
+        getParameterSubsegment = function (pathSegments, parameterName) {
             var foundParameterSubsegment = null;
 
-            forEachParameterSubsegment(pathSegments, function(parameterSubsegment) {
+            forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
                 if (parameterName === parameterSubsegment.value) {
                     foundParameterSubsegment = parameterSubsegment;
                     return false;
@@ -1013,7 +1026,7 @@
 
             return foundParameterSubsegment;
         },
-        isParameterRequired = function(parameterSubsegment, defaultValues) {
+        isParameterRequired = function (parameterSubsegment, defaultValues) {
             if (parameterSubsegment.isCatchAll) {
                 return {
                     isRequired: false,
@@ -1025,13 +1038,13 @@
                 defaultValue: defaultValues[parameterSubsegment.value]
             };
         },
-        isRoutePartNonEmpty = function(routePart) {
+        isRoutePartNonEmpty = function (routePart) {
             if (isString(routePart)) {
                 return routePart.length > 0;
             }
             return !!routePart;
         },
-        areRoutePartsEqual = function(a, b) {
+        areRoutePartsEqual = function (a, b) {
             if (isString(a) && isString(b)) {
                 // For strings do a case-insensitive comparison
                 return a === b;
@@ -1043,13 +1056,13 @@
             // At least one of them is null or undefined. Return true if they both are
             return a === b;
         },
-        encodeUrl = browser ? function(url) {
+        encodeUrl = browser ? function (url) {
             return url; // For browser hash, no need to encode.
         } : encodeURIComponent, // Encode for server side.
-        escapeUrlDataString = browser ? function(value) {
+        escapeUrlDataString = browser ? function (value) {
             return value; // For browser hash, no need to escape.
         } : node("querystring").escape, // Escape for server side.
-        bind = function(pathSegments, currentValues, values, defaultValues, constraints) {
+        bind = function (pathSegments, currentValues, values, defaultValues, constraints) {
             currentValues = currentValues || {};
             values = values || {};
             defaultValues = defaultValues || {};
@@ -1059,7 +1072,7 @@
 
             // Keep track of which new values have been used
             var unusedNewValues = {};
-            forEachKey(values, function(key) {
+            forEachKey(values, function (key) {
                 unusedNewValues[key] = null;
             });
 
@@ -1069,7 +1082,7 @@
             // If the URL had ordered parameters a="1", b="2", c="3" and the new values
             // specified that b="9", then we need to invalidate everything after it. The new
             // values should then be a="1", b="9", c=<no value>.
-            forEachParameterSubsegment(pathSegments, function(parameterSubsegment) {
+            forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
                 // If it's a parameter subsegment, examine the current value to see if it matches the new value
                 var parameterName = parameterSubsegment.value;
 
@@ -1103,7 +1116,7 @@
             });
 
             // Add all remaining new values to the list of values we will use for URL generation
-            forEachKey(values, function(newKey, newValue) {
+            forEachKey(values, function (newKey, newValue) {
                 if (isRoutePartNonEmpty(newValue)) {
                     if (!nativeHasOwn.call(acceptedValues, newKey)) {
                         acceptedValues[newKey] = newValue;
@@ -1112,7 +1125,7 @@
             });
 
             // Add all current values that aren't in the URL at all
-            forEachKey(currentValues, function(currentKey, currentValue) {
+            forEachKey(currentValues, function (currentKey, currentValue) {
                 var parameterName2 = currentKey;
                 if (!nativeHasOwn.call(acceptedValues, parameterName2)) {
                     var parameterSubsegment2 = getParameterSubsegment(pathSegments, parameterName2);
@@ -1123,7 +1136,7 @@
             });
 
             // Add all remaining default values from the route to the list of values we will use for URL generation
-            forEachParameterSubsegment(pathSegments, function(parameterSubsegment) {
+            forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
                 if (!nativeHasOwn.call(acceptedValues, parameterSubsegment.value)) {
                     var result = isParameterRequired(parameterSubsegment, defaultValues);
                     if (!result.isRequired) {
@@ -1137,7 +1150,7 @@
             });
 
             // All required parameters in this URL must have values from somewhere (i.e. the accepted values)
-            var hasAllRequiredValues = forEachParameterSubsegment(pathSegments, function(parameterSubsegment) {
+            var hasAllRequiredValues = forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
                 var result = isParameterRequired(parameterSubsegment, defaultValues);
                 if (result.isRequired) {
                     if (!nativeHasOwn.call(acceptedValues, parameterSubsegment.value)) {
@@ -1156,23 +1169,23 @@
 
             // All other default values must match if they are explicitly defined in the new values
             var otherDefaultValues = getRouteValues(defaultValues);
-            forEachParameterSubsegment(pathSegments, function(parameterSubsegment) {
+            forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
                 delete otherDefaultValues[parameterSubsegment.value];
                 return true;
             });
 
             var shouldReturnNull = false;
-            forEachKey(otherDefaultValues, function(defaultKey, defaultValue) {
+            forEachKey(otherDefaultValues, function (defaultKey, defaultValue) {
                 if (nativeHasOwn.call(values, defaultKey)) {
                     delete unusedNewValues[defaultKey];
                     if (!areRoutePartsEqual(values[defaultKey], defaultValue)) {
                         // If there is a non-parameterized value in the route and there is a
                         // new value for it and it doesn't match, this route won't match.
                         shouldReturnNull = true;
-                        return true;
+                        return false;
                     }
                 }
-                return false;
+                return true;
             });
             if (shouldReturnNull) {
                 return null;
@@ -1297,7 +1310,7 @@
                 // If there are any constraints, mark all the keys as being used so that we don't
                 // generate query string items for custom constraints that don't appear as parameters
                 // in the URL format.
-                forEachKey(constraints, function(constraintKey) {
+                forEachKey(constraints, function (constraintKey) {
                     delete unusedNewValues[constraintKey];
                 });
             }
@@ -1306,7 +1319,7 @@
             if (unusedNewValues) {
                 // Generate the query string
                 var firstParam = true;
-                forEachKey(unusedNewValues, function(unusedNewValue) {
+                forEachKey(unusedNewValues, function (unusedNewValue) {
                     if (nativeHasOwn.call(acceptedValues, unusedNewValue)) {
                         url += firstParam ? '?' : '&';
                         firstParam = false;
@@ -1325,7 +1338,7 @@
         // /Parsed route.
 
         // RouteData.
-        RouteData = function(route, routeHandler, values, dataTokens) {
+        RouteData = function (route, routeHandler, values, dataTokens) {
             this.route = route;
             this.routeHandler = routeHandler;
             this.values = values;
@@ -1334,7 +1347,7 @@
         // /RouteData.
 
         // VirtualPathData.
-        VirtualPathData = function(route, virtualPath, dataTokens /* optional */) {
+        VirtualPathData = function (route, virtualPath, dataTokens /* optional */) {
             this.route = route;
             this.virtualPath = virtualPath;
             this.dataTokens = dataTokens;
@@ -1342,7 +1355,7 @@
         // /VirtualPathData.
 
         // Route.
-        processConstraint = function(route, constraint, virtualPath, parameterName, values, isIncomingRequest) {
+        processConstraint = function (route, constraint, virtualPath, parameterName, values, isIncomingRequest) {
             var parameterValue = values[parameterName];
             if (isFunction(constraint)) {
                 return constraint(parameterValue, virtualPath, route, parameterName, values, isIncomingRequest);
@@ -1357,19 +1370,19 @@
             var constraintsRegEx = new RegExp("^(" + constraint + ")$", "i");
             return parameterValueString.match(constraintsRegEx);
         },
-        processConstraints = function(route, constraints, virtualPath, values, isIncomingRequest) {
+        processConstraints = function (route, constraints, virtualPath, values, isIncomingRequest) {
             var result = true;
-            forEachKey(constraints, function(key, value) {
+            forEachKey(constraints, function (key, value) {
                 if (!processConstraint(route, value, virtualPath, key, values, isIncomingRequest)) {
                     result = false;
-                    return true; // break;
+                    return false; // break;
                 }
-                return false;
+                return true;
             });
             return result;
         },
-        Route = (function() {
-            var constructor = function(url, defaults /* optional */, constraints, dataTokens, routeHandler, name) {
+        Route = (function () {
+            var constructor = function (url, defaults /* optional */, constraints, dataTokens, routeHandler, name) {
                 if (!isString(url)) {
                     error("'url' must be valid.");
                 }
@@ -1398,7 +1411,7 @@
             constructor.prototype = {
                 constructor: constructor,
 
-                getVirtualPathData: function(routeValues, currentRouteValues /* optional */) {
+                getVirtualPathData: function (routeValues, currentRouteValues /* optional */) {
                     routeValues = getRouteValues(routeValues);
                     currentRouteValues = getRouteValues(currentRouteValues);
                     var result = bind(this._segments, currentRouteValues, routeValues, this.defaults, this.constraints);
@@ -1416,7 +1429,7 @@
                     return virtualPathData;
                 },
 
-                getRouteData: function(virtualPath) {
+                getRouteData: function (virtualPath) {
                     if (!isString(virtualPath)) {
                         error("'virtualPath' must be string.");
                     }
@@ -1445,15 +1458,15 @@
         // /Route.
 
         // RouteCollection.
-        IgnoreRoute = (function() {
-            var constructor = function(url, constraints  /* optional */) {
+        IgnoreRoute = (function () {
+            var constructor = function (url, constraints  /* optional */) {
                 Route.call(this, url, {}, constraints, {}, noop);
             };
 
             constructor.prototype = {
                 constructor: constructor,
                 // routeData.routeHandler is always noop.
-                getVirtualPathData: function() {
+                getVirtualPathData: function () {
                     return null;
                 },
 
@@ -1462,11 +1475,11 @@
 
             return constructor;
         }()),
-        RouteTable = function() {
+        RouteTable = function () {
             var namedRoutes = {},
                 allRoutes = [];
 
-            this.getRouteData = function(virtualPath) {
+            this.getRouteData = function (virtualPath) {
                 if (!isString(virtualPath)) {
                     error("'virtualPath' must be string.");
                 }
@@ -1481,7 +1494,7 @@
                 return null;
             };
 
-            this.getVirtualPathData = function(routeValues, currentRouteValues, filter /* optional */) {
+            this.getVirtualPathData = function (routeValues, currentRouteValues, filter /* optional */) {
                 if (filter && !isFunction(filter)) {
                     error("'filter' must be function.");
                 }
@@ -1499,7 +1512,7 @@
                 return null;
             };
 
-            this.push = function(route) {
+            this.push = function (route) {
                 if (!(route.constructor === Route || route.constructor === IgnoreRoute)) {
                     error("'route' must be valid.");
                 }
@@ -1514,7 +1527,7 @@
                 return route;
             };
 
-            this.get = function(key) {
+            this.get = function (key) {
                 // Key should be either name or index.
                 if (isString(key)) {
                     var lowerCaseKey = key.toLowerCase();
@@ -1523,20 +1536,20 @@
                 return allRoutes[key];
             };
 
-            this.ignore = function(url, constraints /* optional */) {
+            this.ignore = function (url, constraints /* optional */) {
                 return this.push(new IgnoreRoute(url, constraints));
             };
 
-            this.clear = function() {
+            this.clear = function () {
                 namedRoutes = {};
                 allRoutes = [];
             };
 
-            this.length = function() {
+            this.length = function () {
                 return allRoutes.length;
             };
 
-            this.Route = function(url, defaults /* optional */, constraints, dataTokens, routeHandler, name) {
+            this.Route = function (url, defaults /* optional */, constraints, dataTokens, routeHandler, name) {
                 return new Route(url, defaults /* optional */, constraints, dataTokens, routeHandler, name);
             };
         };
@@ -1545,19 +1558,17 @@
     // Exports.
     jsMVC.routeTable = new RouteTable();
 
-    copyProps(_, {
-        getUrlParts: getUrlParts,
-        getSegmentLiteral: getSegmentLiteral,
-        getIndexOfFirstOpenParameter: getIndexOfFirstOpenParameter,
-        getUrlSubsegments: getUrlSubsegments,
-        isUrlSubsegmentsValid: isUrlSubsegmentsValid,
-        isUrlPartsValid: isUrlPartsValid,
-        matchSegments: matchSegments,
-        getParsedSegments: getParsedSegments,
-        forEachParameterSubsegment: forEachParameterSubsegment,
-        encodeUrl: encodeUrl,
-        escapeUrlDataString: escapeUrlDataString
-    });
+    _.getUrlParts = getUrlParts;
+    _.getSegmentLiteral = getSegmentLiteral;
+    _.getIndexOfFirstOpenParameter = getIndexOfFirstOpenParameter;
+    _.getUrlSubsegments = getUrlSubsegments;
+    _.isUrlSubsegmentsValid = isUrlSubsegmentsValid;
+    _.isUrlPartsValid = isUrlPartsValid;
+    _.matchSegments = matchSegments;
+    _.getParsedSegments = getParsedSegments;
+    _.forEachParameterSubsegment = forEachParameterSubsegment;
+    _.encodeUrl = encodeUrl;
+    _.escapeUrlDataString = escapeUrlDataString;
 
 }(this.window, !this.window && require, this.jsMVC || exports));
 
@@ -1565,7 +1576,7 @@
 /// <reference path="jsMVC._.js"/>
 /// <reference path="jsMVC.routing.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     if (!browser) {
@@ -1597,21 +1608,21 @@
         previousHref = location.href,
         currentHref,
         // Browser.
-        getHash = function(href) {
+        getHash = function (href) {
             // location.hash has issues in IE6.
             return href.replace(/^[^#]*#?(.*)$/, "$1"); // TODO: refactor.
         },
-        setHash = function(hash) {
+        setHash = function (hash) {
             if (hash.indexOf(hashDelimiter) === 0) {
-                hash.substr(1);
+                hash = hash.substr(1);
             }
             if (hash.indexOf(prefix) === 0) {
-                hash.substr(prefixLength);
+                hash = hash.substr(prefixLength);
             }
             hash = prefix + hash;
             location.hash = hash;
         },
-        normalizeEvent = function(options) {
+        normalizeEvent = function (options) {
             var event = new Event(),
                 virtualPath,
                 index,
@@ -1633,24 +1644,24 @@
                 currentTarget: options.currentTarget,
                 virtualPath: virtualPath,
                 routeData: routeTable.getRouteData(virtualPath),
-                
+
                 newHref: options.newURL || currentHref,
                 oldHref: options.oldURL || previousHref,
                 newHash: newHash,
                 oldHash: options.oldHash || getHash(previousHref),
-                
+
                 request: undefined,
                 response: undefined
             }, true);
             previousHref = currentHref;
             return event;
         },
-        listen = function(callback) {
+        listen = function (callback) {
             var onReadyStateChangeEvent = "onreadystatechange",
                 onLoadEvent = "onload",
                 proxyToIframe,
                 domReady,
-                eventListener = function(event) {
+                eventListener = function (event) {
                     trigger("request", normalizeEvent(event || browser.event));
                 },
                 iframeWindow;
@@ -1664,14 +1675,14 @@
                     browser.attachEvent(onHashChangeEvent, eventListener);
                 } else if (onReadyStateChangeEvent in document) {
                     // IE7, IE6.
-                    proxyToIframe = function() {
+                    proxyToIframe = function () {
                         var iframe = document.createElement(iframeHTML),
                             currentIframeHref,
                             previousIframeHref,
                             body,
-                            poll = function() {
+                            poll = function () {
                                 iframe.detachEvent(onLoadEvent, poll);
-                                browser.setInterval(function() {
+                                browser.setInterval(function () {
                                     currentHref = location.href;
                                     if (previousHref !== currentHref) {
                                         // window.location changed, now window drives iframeWindow.
@@ -1721,7 +1732,7 @@
                         iframeWindow = iframe.contentWindow;
                         previousIframeHref = iframeWindow.location.href;
                     };
-                    domReady = function() {
+                    domReady = function () {
                         if (document.readyState === "complete") {
                             document.detachEvent(onReadyStateChangeEvent, domReady);
                             proxyToIframe();
@@ -1744,7 +1755,7 @@
     // /Browser
 
     // Routing
-        go = function(destination, options) {
+        go = function (destination, options) {
             var oldHref = location.href,
                 virtualPathData,
                 oldRouteData;
@@ -1754,7 +1765,7 @@
                     history.go(destination); // IE6 / IE7 / Chrome / Safari / Opera does not support programatically go back / forward.
                     return location.href !== oldHref;
                 case "string":
-                    location.hash = destination;
+                    setHash(destination);
                     return location.href !== oldHref;
                 case "object":
                     oldRouteData = normalizeEvent().routeData;
@@ -1770,7 +1781,7 @@
         };
     // /Routing
 
-    jsMVC.go = go;
+    jsMVC.go = go; // TODO: Consider removing this.
     jsMVC.current = normalizeEvent;
 
     _.listen = listen;
@@ -1781,7 +1792,7 @@
 /// <reference path="jsMVC._.js"/>
 /// <reference path="jsMVC.routing.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     if (browser) {
@@ -1805,7 +1816,7 @@
         prefix = "/",
         prefixLength = prefix.length,
         server,
-        normalizeEvent = function(options) {
+        normalizeEvent = function (options) {
             var event = new Event(),
                 request,
                 requestMethod,
@@ -1823,7 +1834,7 @@
                 requestedUrl.protocol = request.connection.encrypted ? "https" : "http";
                 requestedUrl.host = request.headers.host;
 
-                referrerUrl = request.headers['referer'] || request.headers['Referer'];
+                referrerUrl = request.headers.referer || request.headers.Referer;
             } else { // Get info from options.
                 // If options.url is provided, use options.url and ignore options.virtualPath.
                 requestMethod = options.type;
@@ -1841,7 +1852,7 @@
             }
 
             referrerUrl = referrerUrl !== undefined ? url.parse(referrerUrl) : {};
-            
+
             virtualPath = requestedUrl.pathname;
             if (virtualPath && virtualPath.substr(0, prefixLength) === prefix) {
                 virtualPath = virtualPath.substr(prefixLength); // Remove starting "/".
@@ -1864,10 +1875,10 @@
                 response: options.response
             });
         },
-        listen = function(callback) {
+        listen = function (callback) {
             var serverDomain = domain.create();
-            serverDomain.run(function() {
-                server = http.createServer().on("request", function(request, response) {
+            serverDomain.run(function () {
+                server = http.createServer().on("request", function (request, response) {
                     var requestDomian = domain.create(),
                         event = normalizeEvent({
                             request: request,
@@ -1877,12 +1888,12 @@
                         });
                     requestDomian.add(request);
                     requestDomian.add(response);
-                    requestDomian.on("error", function(error) {
+                    requestDomian.on("error", function (error) {
                         try {
                             event.status = status.internalError;
                             event.error = error;
                             trigger("fail", event);
-                            response.on("close", function() {
+                            response.on("close", function () {
                                 requestDomian.dispose();
                             });
                         } catch (err) {
@@ -1898,7 +1909,7 @@
             });
         };
 
-    jsMVC.go = function(destination, options) {
+    jsMVC.go = function (destination, options) {
         var virtualPathData;
         options = options || {};
         switch (type(destination)) {
@@ -1920,6 +1931,7 @@
                 return false;
         }
     };
+
     jsMVC.current = normalizeEvent;
     _.listen = listen;
 
@@ -1931,7 +1943,7 @@
 /// <reference path="jsMVC.routing.browser.js"/>
 /// <reference path="jsMVC.routing.node.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     // Imports.
@@ -1943,13 +1955,14 @@
         isString = _.isString,
         isFunction = _.isFunction,
         isInteger = _.isInteger,
-        forEachItem = _.forEachArrayItem,
-        forEachKey = _.forEachObjectKey,
+        forEachItem = _.forEachItem,
+        forEachKey = _.forEachKey,
         copyProps = _.copyProperties,
         some = _.some,
         reduceRight = _.reduceRight,
         map = _.map,
         Event = _.Event,
+        returnFalse = _.returnFalse,
         // Local variables.
         separator = "/",
         emptyString = "",
@@ -1967,30 +1980,30 @@
         defaultOrder = 0,
         idKey = "id",
         // Routing
-        isValidRouteParameter = function(value, canBeEmpty) {
+        isValidRouteParameter = function (value, canBeEmpty) {
             return (canBeEmpty && (value === undefined || value === emptyString)) || (isString(value) && value.indexOf(separator) === -1 && value !== emptyString);
         },
-        validateRouteParameter = function(value, canBeEmpty) {
+        validateRouteParameter = function (value, canBeEmpty) {
             if (!isValidRouteParameter(value, canBeEmpty)) {
                 error(canBeEmpty ? "Route value must be valid." : "Route value must be valid and not empty.");
             }
             return value ? value.toLowerCase() : value;
         },
-        combinePaths = function(child, parent) {
+        combinePaths = function (child, parent) {
             return (parent ? parent + separator : emptyString) + validateRouteParameter(child);
         },
         // /Routing
 
         // Cache
-        Dictionary = (function() { // Case-insensitive dictionary
-            var constructor = function() {
+        Dictionary = (function () { // Case-insensitive dictionary
+            var constructor = function () {
                 this.items = {};
             };
 
             constructor.prototype = {
                 constructor: constructor,
 
-                push: function(key, item) {
+                push: function (key, item) {
                     var lowerCaseKey = key.toLowerCase();
                     if (nativeHasOwn.call(this.items, lowerCaseKey)) {
                         error("Key '" + key + "' must be unique.");
@@ -1999,11 +2012,11 @@
                     return item;
                 },
 
-                get: function(key) {
+                get: function (key) {
                     return this.items[key.toLowerCase()];
                 },
 
-                has: function(key, item) {
+                has: function (key, item) {
                     key = key.toLowerCase();
                     if (arguments.length > 1) {
                         return this.items[key] === item;
@@ -2014,8 +2027,8 @@
 
             return constructor;
         }()),
-        List = (function() {
-            var constructor = function(isOrderRequired, array) {
+        List = (function () {
+            var constructor = function (isOrderRequired, array) {
                 // TODO: Check array.
                 this.isOrderRequired = isOrderRequired;
                 this.items = array || [];
@@ -2025,13 +2038,15 @@
             };
             constructor.prototype = {
                 constructor: constructor,
-                sort: function() {
-                    this.items.sort(function(a, b) {
+
+                sort: function (compare) {
+                    compare = compare || function (a, b) {
                         return a.order - b.order;
-                    });
+                    };
+                    this.items.sort(compare);
                 },
 
-                push: function(item) {
+                push: function (item) {
                     if (this.isOrderRequired && !isInteger(item.order)) {
                         error("'order' must be integer.");
                     }
@@ -2043,11 +2058,11 @@
                     return item;
                 },
 
-                get: function(index) {
+                get: function (index) {
                     return this.items[index];
                 },
 
-                has: function(item) {
+                has: function (item) {
                     for (var index = 0; index < this.items.length; index++) {
                         if (item === this.items[index]) {
                             return true;
@@ -2056,27 +2071,31 @@
                     return false;
                 },
 
-                toArray: function() {
+                toArray: function () {
                     return this.items.slice();
                 },
 
-                forEach: function(callback, context) {
+                forEach: function (callback, context) {
                     forEachItem(this.items, callback, context);
                 },
 
-                map: function(callback, initial) {
+                map: function (callback, initial) {
                     return new List(this.isOrderRequired, map(this.items, callback, initial));
                 },
 
-                reduceRight: function(callback, initial) {
+                reverse: function () {
+                    return new List(this.isOrderRequired, this.items.reverse());
+                },
+
+                reduceRight: function (callback, initial) {
                     return reduceRight(this.items, callback, initial);
                 },
 
-                some: function(callback, context) {
+                some: function (callback, context) {
                     return some(this.items, callback, context);
                 },
 
-                length: function() {
+                length: function () {
                     return this.items.length;
                 }
             };
@@ -2091,7 +2110,7 @@
 
         // Filter
 
-        Filter = function(authorize, beforeAction, afterAction, fail, order) {
+        Filter = function (authorize, beforeAction, afterAction, fail, order) {
             if (authorize && !isFunction(authorize)) {
                 error("'authorize' must be empty or function.");
             }
@@ -2113,39 +2132,72 @@
                 error("'order' must be integer or undefined.");
             }
         },
-        getFilterList = function(optionsArray) {
+        getFilterList = function (optionsArray) {
             var filters = new List(true),
                 filter;
-            forEachItem(optionsArray, function(options) {
+            forEachItem(optionsArray, function (options) {
                 filter = new Filter(options[authorizeFilter], options[beforeActionFilter], options[afterActionFilter], options[errorFilter], options.order);
                 filters.push(filter);
             });
             return filters;
         },
-        executeFilters = function(event, levels, filterType) {
-            var result,
-                execute;
-            forEachItem(levels, function(filters) {
+        executeAndSetResult = function (event, execute) {
+            var previousResult = event.result,
+                result = execute(event);
+            if (result !== undefined) {
+                event.result = result;
+                return true;
+            }
+            event.result = previousResult; // Prvent execute(event) modifying event.result.
+            return false;
+        },
+        executeFilters = function (event, levels, filterType) {
+            var execute;
+            if (event.isPropagationStopped()) {
+                return; // If isPropagationStopped, do nothing.
+            }
+            event.isImmediatePropagationStopped = returnFalse;
+            forEachItem(levels, function (filters) {
+                if (event.isImmediatePropagationStopped()) {
+                    return false; // If isImmediatePropagationStopped, return false to break.
+                }
                 if (filters) {
-                    filters.forEach(function(filter) {
+                    filters.forEach(function (filter) {
+                        if (event.isImmediatePropagationStopped()) {
+                            return false; // If isImmediatePropagationStopped, return false to break.
+                        }
                         execute = filter[filterType];
                         if (execute) {
-                            result = execute(event); // TODO
-                            if (result) {
-                                return true;
-                            }
+                            executeAndSetResult(event, execute);
                         }
-                        return false;
-                    });
-                    if (result) {
                         return true;
-                    }
+                    });
                 }
-                return false;
+                return true;
             });
-            return result;
         },
-        pushFilter = function(options) {
+        executeErrorFilters = function (event, levels) {
+            var execute;
+            forEachItem(levels, function (filters) {
+                if (event.isErrorHandled()) {
+                    return false; // If isErrorHandled, return false to break.
+                }
+                if (filters) {
+                    filters.forEach(function (filter) {
+                        if (event.isErrorHandled()) {
+                            return false; // If isErrorHandled, return false to break.
+                        }
+                        execute = filter[errorFilter];
+                        if (execute) {
+                            executeAndSetResult(event, execute);
+                        }
+                        return true;
+                    });
+                }
+                return true;
+            });
+        },
+        pushFilter = function (options) {
             var filter = new Filter(options[authorizeFilter], options[beforeActionFilter], options[afterActionFilter], options[errorFilter], options.order),
                 target = options.target;
             if (!target) {
@@ -2158,15 +2210,15 @@
                 }
             }
         },
-        getGlobalFilters = function() {
+        getGlobalFilters = function () {
             return globalFilters.toArray();
         },
         // /Filter
 
         // Action
 
-        Action = (function() {
-            var constructor = function(controller, id, execute, filters) {
+        Action = (function () {
+            var constructor = function (controller, id, execute, filters) {
                 if (!controller || !allControllers.has(controller.virtualPath, controller)) {
                     error("'controller' must be valid.");
                 }
@@ -2183,18 +2235,18 @@
 
             constructor.prototype = {
                 constructor: constructor,
-                Filter: function(options) {
+                Filter: function (options) {
                     options.target = this;
                     return pushFilter(options);
                 },
 
-                getFilters: function() {
+                getFilters: function () {
                     return this.filters.toArray();
                 }
             };
             return constructor;
         }()),
-        pushAction = function(options) {
+        pushAction = function (options) {
             var filters = getFilterList(options.filters),
                 action;
             if (isFunction(options)) {
@@ -2211,8 +2263,8 @@
 
         // Controller
 
-        Controller = (function() {
-            var constructor = function(id, area, filters) {
+        Controller = (function () {
+            var constructor = function (id, area, filters) {
                 id = validateRouteParameter(id);
                 if (area && !allAreas.has(area.virtualPath, area)) {
                     error("'area' must be valid or empty.");
@@ -2225,27 +2277,27 @@
 
             constructor.prototype = {
                 constructor: constructor,
-                Action: function(options) {
+                Action: function (options) {
                     options.controller = this;
                     return pushAction(options);
                 },
 
-                Filter: function(options) {
+                Filter: function (options) {
                     options.target = this;
                     return pushFilter(options);
                 },
 
-                getAction: function(id) {
+                getAction: function (id) {
                     return allActions.get(combinePaths(id, this.virtualPath));
                 },
 
-                getFilters: function() {
+                getFilters: function () {
                     return this.filters.toArray();
                 }
             };
             return constructor;
         }()),
-        getActionOptions = function(options, id) {
+        getActionOptions = function (options, id) {
             if (isFunction(options)) {
                 options = {
                     execute: options
@@ -2256,7 +2308,7 @@
             }
             return options;
         },
-        pushController = function(options) {
+        pushController = function (options) {
             var filters,
                 controller;
             if (!options.area && options.areaId) {
@@ -2265,63 +2317,63 @@
             filters = getFilterList(options.filters);
             controller = new Controller(options[idKey], options.area, filters);
             allControllers.push(controller.virtualPath, controller);
-            forEachKey(options.actions, function(actionId, actionOptions) {
+            forEachKey(options.actions, function (actionId, actionOptions) {
                 actionOptions = getActionOptions(actionOptions, actionId);
                 controller.Action(actionOptions);
             });
             return controller;
         },
-        getController = function(id) {
+        getController = function (id) {
             return allControllers.get(id);
         },
         // /Controller
 
         // Area
 
-        Area = (function() {
-            var constructor = function(id, filters) {
+        Area = (function () {
+            var constructor = function (id, filters) {
                 this.virtualPath = this[idKey] = validateRouteParameter(id);
                 this.filters = filters;
             };
 
             constructor.prototype = {
                 constructor: constructor,
-                Route: function(options) {
+                Route: function (options) {
                     options.areaId = this[idKey];
                     return pushRoute(options);
                 },
 
-                Controller: function(options) {
+                Controller: function (options) {
                     options.area = this;
                     return pushController(options);
                 },
 
-                Filter: function(options) {
+                Filter: function (options) {
                     options.target = this;
                     return pushFilter(options);
                 },
 
-                getController: function(id) {
+                getController: function (id) {
                     return allControllers.get(combinePaths(id, this.virtualPath));
                 },
 
-                getFilters: function() {
+                getFilters: function () {
                     return this.filters.toArray();
                 }
             };
             return constructor;
         }()),
-        pushArea = function(options) {
+        pushArea = function (options) {
             var filters = getFilterList(options.filters),
                 area = new Area(options[idKey], filters);
             allAreas.push(area.virtualPath, area);
-            forEachKey(options.controllers, function(controllerId, controllerOptions) {
+            forEachKey(options.controllers, function (controllerId, controllerOptions) {
                 if (!nativeHasOwn.call(controllerOptions, idKey)) {
                     controllerOptions[idKey] = controllerId;
                 }
                 area.Controller(controllerOptions);
             });
-            forEachKey(options.routes, function(routeId, routeOptions) {
+            forEachKey(options.routes, function (routeId, routeOptions) {
                 if (!nativeHasOwn.call(routeOptions, idKey)) {
                     routeOptions[idKey] = routeId;
                 }
@@ -2329,65 +2381,33 @@
             });
             return area;
         },
-        getArea = function(id) {
+        getArea = function (id) {
             return allAreas.get(id);
         },
         // /Area
 
         // Execute
-        executeResult = function(event, result) {
-            if (result) {
+        executeResult = function (event, result) {
+            if (result && isFunction(result.execute)) {
                 result.execute(event);
             }
         },
-        handleError = function(event, errorObject, errorStatus, filterLevels) {
+        handleError = function (event, errorObject, errorStatus, filterLevels) {
             copyProps(event, {
                 status: errorStatus,
                 error: errorObject
             }, true);
-            var result = executeFilters(event, filterLevels, errorFilter);
-            if (!result) {
+            executeErrorFilters(event, filterLevels);
+            if (!event.isErrorHandled()) {
                 throw errorObject;
             }
-            return executeResult(event, result);
+            return executeResult(event, event.result);
         },
-        executeWithFilter = function(event, before, execute, after) {
-            var result,
-                hasError = false;
-
-            if (before) {
-                result = before(event);
-            }
-            if (result) {
-                return result;
-            }
-            try {
-                result = execute(event);
-            } catch (e) {
-                hasError = true;
-                copyProps(event, {
-                    status: status.internalError,
-                    error: e
-                }, true);
-                if (after) {
-                    result = after(event);
-                }
-                if (!result) {
-                    throw e;
-                }
-            }
-            if (!hasError && after) {
-                event.result = result;
-                result = after(event);
-            }
-            return result;
-        },
-        executeAction = function(routeData, virtualPath, actionId, controllerId, areaId /* optional */) {
-            var result,
-                event = routeData.dataTokens.event || new Event(),
+        executeAction = function (routeData, virtualPath, actionId, controllerId, areaId /* optional */) {
+            var event = routeData.dataTokens.event || new Event(),
                 action,
                 filterLevels,
-                execute;
+                reversedFilterLevels;
 
             delete routeData.dataTokens.event;
 
@@ -2402,6 +2422,7 @@
                 return handleError(event, e, status.badRequest, [globalFilters]);
             }
 
+            // TODO: Find area/controller.
             // 2. Find action.
             action = allActions.get(combinePaths(actionId, combinePaths(controllerId, areaId)));
             if (!action) {
@@ -2416,35 +2437,47 @@
                 controller: action.controller,
                 area: action.controller.area
             });
-            filterLevels = [globalFilters, event.area ? event.area.filters : null, event.controller.filters, event.action.filters];
+            filterLevels = [
+                globalFilters,
+                event.area ? event.area.filters : null,
+                event.controller.filters,
+                event.action.filters
+            ];
+            reversedFilterLevels = [
+                event.action.filters.reverse(),
+                event.controller.filters.reverse(),
+                event.area ? event.area.filters.reverse() : null,
+                globalFilters.reverse()
+            ];
             try {
                 // 3. Execute authorize filters
-                result = executeFilters(event, filterLevels, authorizeFilter);
-                if (result) {
-                    return executeResult(event, result);
+                executeFilters(event, filterLevels, authorizeFilter);
+
+                // Execute beforeAction filters.
+                executeFilters(event, filterLevels, beforeActionFilter);
+
+                // Execute Action.
+                if (!event.isDefaultPrevented()) {
+                    executeAndSetResult(event, action.execute);
                 }
 
-                // 4. Execute action with beforeAction and after Action filters
-                execute = event.action.filters.reduceRight(function(continuation, filter) {
-                    return function() {
-                        return executeWithFilter(event, filter[beforeActionFilter], continuation, filter[afterActionFilter]);
-                    };
-                }, action.execute);
-                result = execute(event);
-            } catch (e2) {
-                return handleError(event, e2, status.internalError, filterLevels);
-            }
+                // Execute afterAction filters.
+                executeFilters(event, reversedFilterLevels, afterActionFilter);
 
-            return executeResult(event, result);
+                // Execute result.
+                return executeResult(event, event.result);
+            } catch (e2) {
+                return handleError(event, e2, event.status || status.internalError, filterLevels);
+            }
         },
         // /Execute
 
         // MvcRouteHandler
 
-        mvcRouteHandler = function(routeData, virtualPath) {
+        mvcRouteHandler = function (routeData, virtualPath) {
             executeAction(routeData, virtualPath, routeData.values.action, routeData.values.controller, routeData.dataTokens.area);
         },
-        pushRoute = function(options) {
+        pushRoute = function (options) {
             if (options.areaId) {
                 options.dataTokens = options.dataTokens || {};
                 options.dataTokens.area = validateRouteParameter(options.areaId);
@@ -2461,17 +2494,17 @@
             controllers: pushController,
             routes: pushRoute
         },
-        push = function(configs) {
+        push = function (configs) {
             if (isString(configs) && node) { // configs is a path.
                 configs = node(configs);
             }
             // Filters.
-            forEachItem(configs.filters, function(options) {
+            forEachItem(configs.filters, function (options) {
                 pushFilter(options);
             });
             // Areas, controllers, routes.
-            forEachKey(configKeys, function(configKey, pushMethod) {
-                forEachKey(configs[configKey], function(optionsKey, options) {
+            forEachKey(configKeys, function (configKey, pushMethod) {
+                forEachKey(configs[configKey], function (optionsKey, options) {
                     if (!nativeHasOwn.call(options, idKey)) {
                         options[idKey] = optionsKey;
                     }
@@ -2479,28 +2512,27 @@
                 });
             });
 
+            copyProps(push, configs);
+
             return jsMVC;
         };
     // /Config
 
     // Exports.
-    copyProps(jsMVC, {
-        Route: pushRoute,
-        Area: pushArea,
-        Controller: pushController,
-        Filter: pushFilter,
-        getArea: getArea,
-        getController: getController,
-        getFilters: getGlobalFilters,
-        config: push,
-        status: status
-    });
-    
-    _.executeGlobalErrorFilters = function(event) {
-        executeFilters(event, [globalFilters], errorFilter);
+    jsMVC.Route = pushRoute;
+    jsMVC.Area = pushArea;
+    jsMVC.Controller = pushController;
+    jsMVC.Filter = pushFilter;
+    jsMVC.getArea = getArea;
+    jsMVC.getController = getController;
+    jsMVC.getFilters = getGlobalFilters;
+    jsMVC.status = status;
+
+    _.executeGlobalErrorFilters = function (event) {
+        executeErrorFilters(event, [globalFilters]);
     };
     // /Exports.
-    
+
 }(this.window, !this.window && require, this.jsMVC || exports));
 
 ﻿/// <reference path="jsMVC.js"/>
@@ -2510,9 +2542,38 @@
 /// <reference path="jsMVC.routing.node.js"/>
 /// <reference path="jsMVC.controller.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
-    
+
+    var _ = jsMVC._,
+        noop = _.noop,
+        EmptyResult = (function () {
+            var constructor = function () {
+            };
+
+            constructor.prototype = {
+                constructor: constructor,
+                execute: noop
+            };
+            return constructor;
+        }());
+
+    jsMVC.event.noop = function () {
+        return new EmptyResult();
+    };
+
+}(this.window, !this.window && require, this.jsMVC || exports));
+
+﻿/// <reference path="jsMVC.js"/>
+/// <reference path="jsMVC._.js"/>
+/// <reference path="jsMVC.routing.js"/>
+/// <reference path="jsMVC.routing.browser.js"/>
+/// <reference path="jsMVC.routing.node.js"/>
+/// <reference path="jsMVC.controller.js"/>
+
+(function (browser, node, jsMVC, undefined) {
+    "use strict";
+
     if (!browser) {
         return;
     }
@@ -2526,15 +2587,20 @@
 /// <reference path="jsMVC.routing.node.js"/>
 /// <reference path="jsMVC.controller.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     if (browser) {
         return;
     }
 
-    var fs = node("fs"),
-        contentTypes = { // https://gist.github.com/rrobe53/976610
+    var isString = jsMVC._.isString,
+        fs = node("fs"),
+        path = node("path"),
+        extensionDelimiter = ".",
+        extensionDelimiterLength = extensionDelimiter.length,
+        contentTypes = {
+            // https://gist.github.com/rrobe53/976610
             //"3gp": "video/3gpp",
             //"a": "application/octet-stream",
             //"ai": "application/postscript",
@@ -2701,39 +2767,57 @@
             "ico": "image/vnd.microsoft.icon",
             "js": "application/javascript"
         },
-        getContentType = function(file) {
-            var index = file.lastIndexOf("."),
-                extension = index < 0 ? "" : file.substr(index + 1).toLowerCase();
-            return contentTypes[extension];
+        getContentType = function (file) {
+            var extension = path.extname(file);
+            if (extension.indexOf(extensionDelimiter) === 0) {
+                extension = extension.substr(extensionDelimiterLength); // Remove ".".
+            }
+            return contentTypes[extension.toLowerCase()];
         },
         status = jsMVC.status,
-        notFound = function(response) {
+        notFound = function (response) {
             response.writeHead(status.notFound);
             response.end();
-        };
-
-    jsMVC.event.file = function(file) {
-        return {
-            execute: function(event) {
-                var response = event.response,
-                    type = getContentType(file);
-                if (!type) {
-                    notFound(response);
-                } else {
-                    fs.readFile(file, function(error, data) {
-                        if (error) {
-                            notFound(response);
-                        } else {
-                            response.writeHead(status.ok, {
-                                "Content-Type": type,
-                                "Content-Length": data.length
-                            });
-                            response.end(data);
-                        }
-                    });
-                }
+        },
+        mapPath = function (urlPath, appPath) {
+            if (!isString(appPath)) {
+                appPath = jsMVC.config.appPath;
             }
-        };
+            return isString(appPath) ? path.resolve(appPath, urlPath) : urlPath;
+        },
+        FileResult = (function () {
+            var constructor = function (event, filePath, appPath) {
+                this.event = event;
+                this.filePath = mapPath(filePath, appPath);
+            };
+            constructor.prototype = {
+                constructor: constructor,
+                execute: function () {
+                    var response = this.event.response,
+                        filePath = this.filePath,
+                        type = getContentType(filePath);
+                    if (!type) {
+                        notFound(response);
+                    } else {
+                        fs.readFile(filePath, function (error, data) {
+                            if (error) {
+                                notFound(response);
+                            } else {
+                                response.writeHead(status.ok, {
+                                    "Content-Type": type,
+                                    "Content-Length": data.length
+                                });
+                                response.end(data);
+                            }
+                        });
+                    }
+                }
+            };
+            return constructor;
+        }());
+
+    jsMVC.event.file = function (filePath, appPath) {
+        return new FileResult(this, filePath, appPath);
     };
 
 }(this.window, !this.window && require, this.jsMVC || exports));
@@ -2741,15 +2825,16 @@
 ﻿/// <reference path="jsMVC.js"/>
 /// <reference path="jsMVC._.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
+    "use strict";
 
     // Imports
     var nativeHasOwn = Object.prototype.hasOwnProperty,
         // Imports
         _ = jsMVC._,
         error = _.error,
-        forEachItem = _.forEachArrayItem,
-        forEachKey = _.forEachObjectKey,
+        forEachItem = _.forEachItem,
+        forEachKey = _.forEachKey,
         copyProps = _.copyProperties,
         isFunction = _.isFunction,
         isObject = _.isObject,
@@ -2766,18 +2851,18 @@
 
     // Observable
 
-    var fireObservable = function(observable, eventType, newValue, oldValue, key) {
-        forEachItem(observable._eventListeners[eventType], function(listener) {
+    var fireObservable = function (observable, eventType, newValue, oldValue, key) {
+        forEachItem(observable._eventListeners[eventType], function (listener) {
             listener.call(observable, newValue, oldValue, eventType, key);
         });
         if (arguments.length > 4) {
-            forEachItem(observable._keyEventListeners[eventType][key], function(listener) {
+            forEachItem(observable._keyEventListeners[eventType][key], function (listener) {
                 listener.call(observable, newValue, oldValue, eventType, key);
             });
         }
     };
 
-    var addObservableKeyEventListener = function(observable, eventType, listener, key) {
+    var addObservableKeyEventListener = function (observable, eventType, listener, key) {
         var keyListeners = observable._keyEventListeners[eventType];
         if (!nativeHasOwn.call(keyListeners, key)) {
             keyListeners[key] = [];
@@ -2785,17 +2870,17 @@
         keyListeners[key].push(listener);
     };
 
-    var addObservableEventListener = function(observable, eventType, listener) {
+    var addObservableEventListener = function (observable, eventType, listener) {
         observable._eventListeners[eventType].push(listener);
     };
 
-    var removeObservableKeyListeners = function(observable, key) {
-        forEachKey(observable._keyEventListeners, function(eventType) {
+    var removeObservableKeyListeners = function (observable, key) {
+        forEachKey(observable._keyEventListeners, function (eventType) {
             observable._keyEventListeners[eventType][key] = [];
         });
     };
 
-    var removeObservableKeyEventListeners = function(observable, eventType, key) {
+    var removeObservableKeyEventListeners = function (observable, eventType, key) {
         if (eventType in observable._keyEventListeners) {
             var eventListeners = observable._keyEventListeners[eventType];
             if (key in eventListeners) {
@@ -2804,7 +2889,7 @@
         }
     };
 
-    var removeObservableEventListener = function(observable, eventType, listener) {
+    var removeObservableEventListener = function (observable, eventType, listener) {
         if (eventType in observable._eventListeners) {
             var eventListeners = observable._eventListeners[eventType];
             for (var index = 0; index < eventListeners.length; index++) {
@@ -2817,14 +2902,14 @@
         }
     };
 
-    var removeObservableEventListeners = function(observable, eventType) {
+    var removeObservableEventListeners = function (observable, eventType) {
         var eventListeners = observable._eventListeners;
         if (eventType in eventListeners) {
             eventListeners[eventType] = [];
         }
     };
 
-    var removeObservableKeyEventListener = function(observable, eventType, listener, key) {
+    var removeObservableKeyEventListener = function (observable, eventType, listener, key) {
         if (eventType in observable._keyEventListeners) {
             var eventListeners = observable._keyEventListeners[eventType];
             if (key in eventListeners) {
@@ -2842,9 +2927,9 @@
         }
     };
 
-    var removeObservableListener = function(observable, listener) {
+    var removeObservableListener = function (observable, listener) {
         var index;
-        forEachKey(observable._eventListeners, function(eventType, eventListeners) {
+        forEachKey(observable._eventListeners, function (eventType, eventListeners) {
             for (index = 0; index < eventListeners.length;) {
                 if (eventListeners[index] === listener) {
                     eventListeners.splice(index, 1);
@@ -2853,8 +2938,8 @@
                 }
             }
         });
-        forEachKey(observable._keyEventListeners, function(eventType, eventListeners) {
-            forEachKey(eventListeners, function(key, keyListeners) {
+        forEachKey(observable._keyEventListeners, function (eventType, eventListeners) {
+            forEachKey(eventListeners, function (key, keyListeners) {
                 for (index = 0; index < keyListeners.length;) {
                     if (keyListeners[index] === listener) {
                         keyListeners.splice(index, 1);
@@ -2866,8 +2951,8 @@
         });
     };
 
-    var Observable = (function() {
-        var constructor = function(data, asCopy) {
+    var Observable = (function () {
+        var constructor = function (data, asCopy) {
             this.isArray = isArray(data);
             if (!this.isArray && !isObject(data)) {
                 error("'data' must be object or array.");
@@ -2881,12 +2966,12 @@
             var that = this;
 
             this._eventListeners = {};
-            forEachKey(eventTypes, function(eventType) {
+            forEachKey(eventTypes, function (eventType) {
                 that._eventListeners[eventType] = [];
             });
 
             this._keyEventListeners = {};
-            forEachKey(eventTypes, function(keyEventType) {
+            forEachKey(eventTypes, function (keyEventType) {
                 that._keyEventListeners[keyEventType] = {};
             });
         };
@@ -2894,15 +2979,15 @@
         constructor.prototype = {
             constructor: constructor,
 
-            length: function() {
+            length: function () {
                 return this.isArray ? this.data.length : countKeys(this.data);
             },
 
-            get: function(key) {
+            get: function (key) {
                 return this.data[key];
             },
 
-            set: function(key, value) {
+            set: function (key, value) {
                 if (!nativeHasOwn.call(this.data, key)) {
                     error("Key or index '" + key + "' must be existing.");
                 }
@@ -2914,7 +2999,7 @@
                 return this;
             },
 
-            add: function() {
+            add: function () {
                 var args = arguments,
                     key,
                     value,
@@ -2950,7 +3035,7 @@
                     var dependentKeys = args[2];
                     value = getter.apply(this, getArrayValues(this.data, dependentKeys));
                     this.data[key] = value;
-                    this.on(eventTypes.change, function(newValue, oldValue, eventType, changedKey) {
+                    this.on(eventTypes.change, function (newValue, oldValue, eventType, changedKey) {
                         if (indexOf(dependentKeys, changedKey) >= 0) {
                             this.set(key, getter.apply(this, getArrayValues(this.data, dependentKeys)));
                         }
@@ -2961,11 +3046,11 @@
                 return this;
             },
 
-            push: function(item) {
+            push: function (item) {
                 return this.add(item);
             },
 
-            pop: function() {
+            pop: function () {
                 if (!this.isArray) {
                     error("Popping an item must be used for array.");
                 }
@@ -2974,7 +3059,7 @@
                 return item;
             },
 
-            addAt: function(index, item) {
+            addAt: function (index, item) {
                 if (!this.isArray) {
                     error("Adding item at an index must be used for array.");
                 }
@@ -2986,7 +3071,7 @@
                 return this;
             },
 
-            remove: function() {
+            remove: function () {
                 var args = arguments,
                     key,
                     value;
@@ -3012,7 +3097,7 @@
                 return this;
             },
 
-            removeAll: function(keys) {
+            removeAll: function (keys) {
                 var index;
 
                 if (this.isArray) {
@@ -3024,7 +3109,7 @@
                         }
                     } else {
                         // removeAll(indexes) for array.
-                        keys.sort(function(a, b) {
+                        keys.sort(function (a, b) {
                             return b - a;
                         });
                     }
@@ -3035,18 +3120,18 @@
                     if (arguments.length < 1) {
                         // removeAll() for object.
                         keys = [];
-                        forEachKey(this.data, function(key) {
+                        forEachKey(this.data, function (key) {
                             keys.push(key);
                         });
                     }
                     // removeAll(keys) for object.
-                    forEachItem(keys, function(key) {
+                    forEachItem(keys, function (key) {
                         this.remove(key);
                     });
                 }
             },
 
-            removeAt: function(index) {
+            removeAt: function (index) {
                 if (!this.isArray) {
                     error("Removing item at an index must be used for array.");
                 }
@@ -3059,7 +3144,7 @@
                 removeObservableKeyListeners(this, index);
             },
 
-            on: function(eventType, listener, key) { // listener: (newValue, oldValue, event, key)
+            on: function (eventType, listener, key) { // listener: (newValue, oldValue, event, key)
                 if (arguments.length < 3) {
                     // on(eventType, listener)
                     if (!isFunction(eventType)) {
@@ -3077,7 +3162,7 @@
                 return this;
             },
 
-            off: function() {
+            off: function () {
                 var args = arguments,
                     listener = args[0],
                     key;
@@ -3110,7 +3195,7 @@
                 return this;
             },
 
-            forEach: function(callback, context) {
+            forEach: function (callback, context) {
                 if (arguments.length < 2) {
                     context = this;
                 }
@@ -3120,7 +3205,7 @@
                     forEachKey(this.data, callback, context);
                 }
             },
-            
+
             sort: function (callback) {
                 // TODO: Implement.
             }
@@ -3128,23 +3213,23 @@
         return constructor;
     }());
 
-    var isObservable = function(object) {
+    var isObservable = function (object) {
         return object && object.constructor === Observable;
     };
 
-    var getValue = function(data, key) {
+    var getValue = function (data, key) {
         return isObservable(data) ? data.get(key) : data[key];
     };
 
     // /Observable
 
     // Exports
-    jsMVC.Observable = function(data) {
+    jsMVC.Observable = function (data) {
         return new Observable(data);
     };
     jsMVC.Observable.eventTypes = eventTypes;
     jsMVC.isObservable = isObservable;
-    
+
     _.getValue = getValue;
     // /Exports
 
@@ -3154,7 +3239,7 @@
 /// <reference path="jsMVC._.js"/>
 /// <reference path="jsMVC.observable.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     if (!browser) {
@@ -3167,8 +3252,8 @@
         _ = jsMVC._,
         noop = _.noop,
         error = _.error,
-        forEachItem = _.forEachArrayItem,
-        forEachKey = _.forEachObjectKey,
+        forEachItem = _.forEachItem,
+        forEachKey = _.forEachKey,
         isFunction = _.isFunction,
         isObject = _.isObject,
         isArray = _.isArray,
@@ -3177,18 +3262,18 @@
         observableEventTypes = jsMVC.Observable.eventTypes,
         isObservable = jsMVC.isObservable,
         // Other utilities
-        hasKey = function(object) {
+        hasKey = function (object) {
             var result = false;
-            forEachKey(object, function() {
+            forEachKey(object, function () {
                 result = true;
-                return true; // break forEachObjectKey.
+                return false; // break forEachKey.
             });
             return result;
         },
         nativeTrim = String.prototype.trim,
-        trim = nativeTrim ? function(value) {
+        trim = nativeTrim ? function (value) {
             return nativeTrim.call(value);
-        } : function(value) {
+        } : function (value) {
             return value.replace(/^\s+|\s+$/g, "");
         },
         // Constants.
@@ -3239,7 +3324,7 @@
             unload: true,
             wheel: true
         },
-        propertyComplianceMap = (function() {
+        propertyComplianceMap = (function () {
             var map = {};
             // innerText / textContent
             if (testElement.textContent === undefined && testElement.innerText !== undefined) {
@@ -3253,47 +3338,47 @@
         bindIdKey = "jsdatabindid",
         dataBindIdKey = dataPrefix + bindIdKey,
         // DOM Utilities
-        setElementBindIdAttribute = testElement.dataset ? function(element, bindId) {
+        setElementBindIdAttribute = testElement.dataset ? function (element, bindId) {
             element.dataset[bindIdKey] = bindId;
-        } : function(element, bindId) {
+        } : function (element, bindId) {
             element.setAttribute(dataBindIdKey, bindId);
         },
-        getElementBindIdAttribute = function(element) {
+        getElementBindIdAttribute = function (element) {
             return element.getAttribute(dataBindIdKey);
         },
-        removeElementBindIdAttribute = function(element) {
+        removeElementBindIdAttribute = function (element) {
             element.removeAttribute(dataBindIdKey);
         },
-        getPropertyBindDeclaration = testElement.dataset ? function(element) {
+        getPropertyBindDeclaration = testElement.dataset ? function (element) {
             return element.dataset[bindKey];
-        } : function(element) {
+        } : function (element) {
             return element.getAttribute(dataBindKey);
         },
-        getPropertyBindBackDeclaration = testElement.dataset ? function(element) {
+        getPropertyBindBackDeclaration = testElement.dataset ? function (element) {
             return element.dataset[bindBackKey];
-        } : function(element) {
+        } : function (element) {
             return element.getAttribute(dataBindBackKey);
         },
-        getElementBindDeclaration = testElement.dataset ? function(element) {
+        getElementBindDeclaration = testElement.dataset ? function (element) {
             return element.dataset[eachKey];
-        } : function(element) {
+        } : function (element) {
             return element.getAttribute(dataEachKey);
         },
-        addEventListener = browser.addEventListener ? function(element, eventTypes, listener) {
-            forEachItem(trim(eventTypes).split(/\s+/), function(eventType) { // "click change" -> ["click", "change"]
+        addEventListener = browser.addEventListener ? function (element, eventTypes, listener) {
+            forEachItem(trim(eventTypes).split(/\s+/), function (eventType) { // "click change" -> ["click", "change"]
                 element.addEventListener(eventType, listener, false);
             });
-        } : (browser.attachEvent ? function(element, eventTypes, listener) {
-            forEachItem(trim(eventTypes).split(/\s+/), function(eventType) { // "click change" -> ["click", "change"]
+        } : (browser.attachEvent ? function (element, eventTypes, listener) {
+            forEachItem(trim(eventTypes).split(/\s+/), function (eventType) { // "click change" -> ["click", "change"]
                 element.attachEvent(eventTypePrefix + eventType, listener);
             });
         } : noop),
-        removeEventListener = browser.removeEventListener ? function(element, eventTypes, listener) {
-            forEachItem(trim(eventTypes).split(/\s+/), function(eventType) { // "click change" -> ["click", "change"]
+        removeEventListener = browser.removeEventListener ? function (element, eventTypes, listener) {
+            forEachItem(trim(eventTypes).split(/\s+/), function (eventType) { // "click change" -> ["click", "change"]
                 element.removeEventListener(eventType, listener, false);
             });
-        } : (browser.detachEvent ? function(element, eventTypes, listener) {
-            forEachItem(trim(eventTypes).split(/\s+/), function(eventType) { // "click change" -> ["click", "change"]
+        } : (browser.detachEvent ? function (element, eventTypes, listener) {
+            forEachItem(trim(eventTypes).split(/\s+/), function (eventType) { // "click change" -> ["click", "change"]
                 element.detachEvent(eventTypePrefix + eventType, listener);
             });
         } : noop);
@@ -3302,14 +3387,14 @@
 
     var bindIdValue = 0;
 
-    var getBindIdValue = function() {
+    var getBindIdValue = function () {
         return ++bindIdValue; // bindIdValue will not be 0.
     };
 
     var indexRegExp = /(\[\d+\])/g;
     var indexRegExpReplace = ".$1";
 
-    var formatPath = function(value) {
+    var formatPath = function (value) {
         value = trim(value).replace(indexRegExp, indexRegExpReplace); // [123] -> .[123]
         return value.length > 0 ? value : null;
     };
@@ -3318,52 +3403,52 @@
     var thisKey = "this";
 
     var simpleChangeEventHelper = {
-        add: function(element, listener) {
+        add: function (element, listener) {
             addEventListener(element, "change", listener);
         },
-        remove: function(element, listener) {
+        remove: function (element, listener) {
             removeEventListener(element, "change", listener);
         }
     };
-    var complexChangeEventHelper = (function() {
+    var complexChangeEventHelper = (function () {
         if (browser.ActiveXObject) {
             // IE
             return document.documentMode === 9 ? { // IE9: propertychange and keyup
-                add: function(element, listener) {
-                    forEachItem(["propertychange", "keyup"], function(eventType) {
+                add: function (element, listener) {
+                    forEachItem(["propertychange", "keyup"], function (eventType) {
                         element.attachEvent(eventTypePrefix + eventType, listener);
                     });
                 },
-                remove: function(element, listener) {
-                    forEachItem(["propertychange", "keyup"], function(eventType) {
+                remove: function (element, listener) {
+                    forEachItem(["propertychange", "keyup"], function (eventType) {
                         element.detachEvent(eventTypePrefix + eventType, listener);
                     });
                 }
             } : { // IE6, IE7, IE8, IE10: propertychange
-                add: function(element, listener) {
+                add: function (element, listener) {
                     element.attachEvent(eventTypePrefix + "propertychange", listener);
                 },
-                remove: function(element, listener) {
+                remove: function (element, listener) {
                     element.detachEvent(eventTypePrefix + "propertychange", listener);
                 }
             };
         } else {
             // Chrome, firefox, safari: input and blur. No DOM observing, DOMAttrModified/Observer not working.
             return {
-                add: function(element, listener) {
-                    forEachItem(["input", "blur"], function(eventType) {
+                add: function (element, listener) {
+                    forEachItem(["input", "blur"], function (eventType) {
                         element.addEventListener(eventType, listener, false);
                     });
                 },
-                remove: function(element, listener) {
-                    forEachItem(["input", "blur"], function(eventType) {
+                remove: function (element, listener) {
+                    forEachItem(["input", "blur"], function (eventType) {
                         element.removeEventListener(eventType, listener, false);
                     });
                 }
             };
         }
     }());
-    var removeChangeEventListener = browser.ActiveXObject ? function(element, eventType, listener) {
+    var removeChangeEventListener = browser.ActiveXObject ? function (element, eventType, listener) {
         switch (type) {
             case "propertychange":
             case "keyup":
@@ -3371,10 +3456,10 @@
             default:
                 removeEventListener(element, eventType, listener);
         }
-    } : function(element, event, listener) {
+    } : function (element, event, listener) {
         removeEventListener(element, event.type, listener);
     };
-    var isBindBackSupported = function(element, event) {
+    var isBindBackSupported = function (element, event) {
         switch (event.type) {
             case "propertychange":
                 return event.propertyName === "value";
@@ -3462,7 +3547,7 @@
         // TODO: keygen, datalist
     };
 
-    var getChangeEventListenerHelper = function(element, elementPath) {
+    var getChangeEventListenerHelper = function (element, elementPath) {
         var tagName = element.tagName,
             supportHelper = bindBackSupportMap[tagName];
         if (!supportHelper) {
@@ -3477,7 +3562,7 @@
         return supportHelper[elementPath];
     };
 
-    var getPathKeys = function(path, format) {
+    var getPathKeys = function (path, format) {
         if (format) {
             path = formatPath(path); // [123] -> .[123]
         }
@@ -3488,7 +3573,7 @@
         if (keys[0] === thisKey) {
             keys = keys.slice(1); // remove beginning "this".
         }
-        forEachItem(keys, function(key, index) {
+        forEachItem(keys, function (key, index) {
             if (indexKeyRegExp.test(key)) { // "[123]" -> Number(123)
                 keys[index] = parseInt(key.substring(1, key.length - 1), 10);
             }
@@ -3496,7 +3581,7 @@
         return keys;
     };
 
-    var getPropertyMap = function(declarations, dataPathPrefix) {
+    var getPropertyMap = function (declarations, dataPathPrefix) {
         var dataKeys;
         if (!declarations) {
             return null;
@@ -3530,7 +3615,7 @@
 
     var propertyBindingCache = {};
 
-    var pushPropertyBinding = function(binding) {
+    var pushPropertyBinding = function (binding) {
         var bindId = binding.id;
         if (bindId in propertyBindingCache) {
             error("Property binding (id: " + bindId + ") must has unique id.");
@@ -3538,17 +3623,17 @@
         propertyBindingCache[bindId] = binding;
     };
 
-    var getPropertyBinding = function(bindId) {
+    var getPropertyBinding = function (bindId) {
         return propertyBindingCache[bindId];
     };
 
-    var destroyPropertyBinding = function(bindId) {
+    var destroyPropertyBinding = function (bindId) {
         var propertyBinding = getPropertyBinding(bindId);
         if (!propertyBinding) {
             return;
         }
         if (propertyBinding.eventListeners) {
-            forEachKey(propertyBinding.eventListeners, function(key, eventListener) {
+            forEachKey(propertyBinding.eventListeners, function (key, eventListener) {
                 removeEventListener(propertyBinding.element, key, eventListener);
                 delete propertyBinding.eventListeners[key];
             });
@@ -3556,7 +3641,7 @@
         }
 
         if (propertyBinding.propertyBackMap) {
-            forEachKey(propertyBinding.propertyBackMap, function(elementPath) {
+            forEachKey(propertyBinding.propertyBackMap, function (elementPath) {
                 var changeEventListenerHelper = getChangeEventListenerHelper(propertyBinding.element, elementPath);
                 changeEventListenerHelper.remove(propertyBinding.element, setDataPropertyListener);
                 delete propertyBinding.propertyBackMap[elementPath];
@@ -3573,7 +3658,7 @@
 
     var elementBindingCache = {};
 
-    var pushElementBinding = function(binding) {
+    var pushElementBinding = function (binding) {
         var bindId = binding.id;
         if (bindId in elementBindingCache) {
             error("Element binding (id: " + bindId + ") must has unique id.");
@@ -3581,11 +3666,11 @@
         elementBindingCache[bindId] = binding;
     };
 
-    var getElementBinding = function(bindId) {
+    var getElementBinding = function (bindId) {
         return elementBindingCache[bindId];
     };
 
-    var destroyElementBinding = function(bindId) {
+    var destroyElementBinding = function (bindId) {
         var elementBinding = getElementBinding(bindId);
 
         if (!elementBinding) {
@@ -3604,7 +3689,7 @@
 
     // Element binding
 
-    var setElement = function(newValue, oldValue, eventType, index, parentElement, template, templateChildCount) {
+    var setElement = function (newValue, oldValue, eventType, index, parentElement, template, templateChildCount) {
         var nodeIndex = index * templateChildCount;
         switch (eventType) {
             case observableEventTypes.add:
@@ -3632,14 +3717,14 @@
         }
     };
 
-    var addElementsForArray = function(item, itemIndex) {
+    var addElementsForArray = function (item, itemIndex) {
         setElement(item, undefined, observableEventTypes.add, itemIndex, this.parentElement, this.template, this.templateChildCount);
     };
 
-    var setElementListener = function(newValue, oldValue, eventType, key) {
+    var setElementListener = function (newValue, oldValue, eventType, key) {
         var dataScope,
             index;
-        forEachKey(this._elementMaps, function(bindId, dataKeys) {
+        forEachKey(this._elementMaps, function (bindId, dataKeys) {
             var elementBinding = getElementBinding(bindId);
             if (elementBinding) {
                 if (dataKeys.length === 0) {
@@ -3713,7 +3798,7 @@
         }, this);
     };
 
-    var ElementBinding = function(bindId, dataKeys, data, parentElement) {
+    var ElementBinding = function (bindId, dataKeys, data, parentElement) {
         var isObservingArray = false,
             index,
             dataScope = data,
@@ -3759,7 +3844,7 @@
                         dataScope.on(observableEventTypes.change, setElementListener);
                     }
                     dataScope._elementMaps[bindId] = [];
-                    dataScope.forEach(function(item, itemIndex) {
+                    dataScope.forEach(function (item, itemIndex) {
                         setElement(dataScope.get(itemIndex), undefined, observableEventTypes.add, itemIndex, parentElement, templateFragment, childCount);
                     });
                 }
@@ -3784,7 +3869,7 @@
 
     // Property binding
 
-    var setElementProperty = function(element, elementPath, value, eventListeners) {
+    var setElementProperty = function (element, elementPath, value, eventListeners) {
         var elementKeys = getPathKeys(elementPath); // TODO: format?
         var elementScope = element;
         for (var index = 0; elementScope && index < elementKeys.length - 1; index++) {
@@ -3815,16 +3900,16 @@
         }
     };
 
-    var setElementPropertyListener = function(newValue, oldValue, eventType, key) {
+    var setElementPropertyListener = function (newValue, oldValue, eventType, key) {
         var propertyBinding,
             dataScope,
             index,
             currentMap;
 
-        forEachKey(this._propertyMaps, function(bindId, propertyMap) { // TODO: O(N^3), consider improve.
+        forEachKey(this._propertyMaps, function (bindId, propertyMap) { // TODO: O(N^3), consider improve.
             propertyBinding = getPropertyBinding(bindId);
             if (propertyBinding) {
-                forEachKey(propertyMap, function(elementPath, dataKeys) {
+                forEachKey(propertyMap, function (elementPath, dataKeys) {
                     if (dataKeys.length === 1 && dataKeys[0] === key) { // key is "a", dataPath is "a"
                         setElementProperty(propertyBinding.element, elementPath, newValue, propertyBinding.eventListeners);
                     } else if (dataKeys.length > 1 && dataKeys[0] === key) { // key is "a", dataPath is "a.b.c"
@@ -3886,7 +3971,7 @@
         }, this);
     };
 
-    var setDataValueByKey = function(data, key, value) {
+    var setDataValueByKey = function (data, key, value) {
         if (isObservable(data)) {
             data.set(key, value);
         } else if (isObject(data)) {
@@ -3894,7 +3979,7 @@
         }
     };
 
-    var setDataProperty = function(data, dataKeys, value) {
+    var setDataProperty = function (data, dataKeys, value) {
         var dataScope = data;
         for (var index = 0; dataScope && index < dataKeys.length - 1; index++) {
             dataScope = getValue(dataScope, dataKeys[index]);
@@ -3902,7 +3987,7 @@
         setDataValueByKey(dataScope, dataKeys[index], value);
     };
 
-    var setDataPropertyListener = function(event) {
+    var setDataPropertyListener = function (event) {
         event = event || browser.event;
         var element = event.target || event.srcElement;
         if (!element) {
@@ -3923,12 +4008,12 @@
         }
         // This element has binding.
         var data = binding.data;
-        forEachKey(binding.propertyBackMap, function(elementPath, dataKeys) {
+        forEachKey(binding.propertyBackMap, function (elementPath, dataKeys) {
             setDataProperty(data, dataKeys, element[elementPath]);
         });
     };
 
-    var PropertyBinding = function(bindId, propertyMap, propertyBackMap, data, element) {
+    var PropertyBinding = function (bindId, propertyMap, propertyBackMap, data, element) {
         var isObservingData = false,
             isObservingElement = false,
             dataScope,
@@ -3939,7 +4024,7 @@
             changeEventListenerHelper;
 
         if (propertyMap) {
-            forEachKey(propertyMap, function(elementPath, dataKeys) {
+            forEachKey(propertyMap, function (elementPath, dataKeys) {
                 dataScope = data;
                 observeDataPath = false;
 
@@ -3970,7 +4055,7 @@
         }
 
         if (propertyBackMap) {
-            forEachKey(propertyBackMap, function(elementPath, dataKeys) {
+            forEachKey(propertyBackMap, function (elementPath, dataKeys) {
                 // Not tree here.
                 changeEventListenerHelper = getChangeEventListenerHelper(element, elementPath);
                 if (changeEventListenerHelper) {
@@ -4001,7 +4086,7 @@
 
     // Bind
 
-    var bindElement = function(element, data, dataPathPrefix) { // TODO: data-context
+    var bindElement = function (element, data, dataPathPrefix) { // TODO: data-context
         var bindId,
             binding,
             declaration,
@@ -4060,15 +4145,15 @@
         return bindChildren;
     };
 
-    var bindSiblingElements = function(siblings, data, dataPathPrefix) {
-        forEachItem(siblings, function(element) {
+    var bindSiblingElements = function (siblings, data, dataPathPrefix) {
+        forEachItem(siblings, function (element) {
             if (element.nodeType === 1) {
                 bindElementAndChildren(element, data, dataPathPrefix);
             }
         });
     };
 
-    var bindElementAndChildren = function(element, data, dataPathPrefix) {
+    var bindElementAndChildren = function (element, data, dataPathPrefix) {
         var bindChildren = bindElement(element, data, dataPathPrefix);
         if (bindChildren && element.hasChildNodes) {
             bindSiblingElements(element.childNodes, data, dataPathPrefix);
@@ -4079,7 +4164,7 @@
 
     // Bind root
 
-    var bind = function(root, data) {
+    var bind = function (root, data) {
         var index;
         if (root.nodeType) { // Single node.
             bindElementAndChildren(root, data);
@@ -4101,7 +4186,7 @@
         }
     };
 
-    var unbind = function(root) {
+    var unbind = function (root) {
         bind(root, undefined);
     };
 
@@ -4117,69 +4202,112 @@
     jsMVC.unbind = unbind;
 
     if (jQuery) {
-        jQuery.fn.dataBind = function(data) {
-            return this.each(function() {
+        jQuery.fn.dataBind = function (data) {
+            return this.each(function () {
                 bind(this, data);
             });
         };
-        jQuery.fn.dataUnbind = function() {
-            return this.each(function() {
+        jQuery.fn.dataUnbind = function () {
+            return this.each(function () {
                 unbind(this);
             });
         };
     }
-    
+
     // /Exports.
 }(this.window, !this.window && require, this.jsMVC || exports));
 
 ﻿/// <reference path="jsMVC.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     // Imports.
-    var _ = jsMVC._,
+    var nativeHasOwn = Object.prototype.hasOwnProperty,
+        _ = jsMVC._,
         trigger = _.trigger,
         listen = _.listen,
         executeGlobalErrorFilters = _.executeGlobalErrorFilters,
+        isString = _.isString,
+        forEachItem = _.forEachItem,
+        forEachKey = _.forEachKey,
+        copyProps = _.copyProperties,
+        isObject = _.isObject,
         status = jsMVC.status,
+        pushArea = jsMVC.Area,
+        pushController = jsMVC.Controller,
+        pushRoute = jsMVC.Route,
+        pushFilter = jsMVC.Filter,
+        idKey = "id",
         // Local variables.
         isReady = false,
-        ready = function(callback) {
-            if (!isReady) {
-                isReady = true;
-                // Side effects.
-                // Hook up Routing with browser's hashchange event.
-                jsMVC.on("request", function(event) {
-                    var virtualPath = event.virtualPath,
-                        routeData = event.routeData;
-                    if (routeData) {
-                        routeData.dataTokens.event = event;
-                        try {
-                            routeData.routeHandler(routeData, virtualPath);
-                        } catch (err) {
-                            event.status = status.internalError;
-                            event.error = err;
-                            trigger("fail", event);
-                        }
-                    } else {
+        configKeys = {
+            areas: pushArea,
+            controllers: pushController,
+            routes: pushRoute
+        },
+        ready = function (callback) {
+            // Side effects.
+            // Hook up Routing with browser's hashchange event.
+            jsMVC.on("request", function (event) {
+                var virtualPath = event.virtualPath,
+                    routeData = event.routeData;
+                if (routeData) {
+                    routeData.dataTokens.event = event;
+                    try {
+                        routeData.routeHandler(routeData, virtualPath);
+                    } catch (err) {
+                        event.status = status.internalError;
+                        event.error = err;
                         trigger("fail", event);
                     }
-                }).on("fail", function(event) {
-                    event.status = status.badRequest;
-                    event.error = new Error("Route cannot be found.");
-                    executeGlobalErrorFilters(event);
-                });
-                listen(callback);
-
-                if (browser) {
-                    trigger("request", jsMVC.current());
+                } else {
+                    trigger("fail", event);
                 }
+            }).on("fail", function (event) {
+                event.status = status.badRequest;
+                event.error = new Error("Route cannot be found.");
+                executeGlobalErrorFilters(event);
+            });
+            listen(callback);
+
+            if (browser) {
+                trigger("request", jsMVC.current());
+            }
+        },
+        config = function (options) {
+            if (node && isString(options)) { // configs is a path.
+                options = node(options);
+            }
+
+            if (isObject(options)) {
+                // TODO: support reset.
+
+                // Filters.
+                forEachItem(options.filters, function (filter) {
+                    pushFilter(filter);
+                });
+                // Areas, controllers, routes.
+                forEachKey(configKeys, function (configKey, pushMethod) {
+                    forEachKey(options[configKey], function (optionsKey, optionsValue) {
+                        if (!nativeHasOwn.call(optionsValue, idKey)) {
+                            optionsValue[idKey] = optionsKey;
+                        }
+                        pushMethod(optionsValue);
+                    });
+                });
+
+                copyProps(config, options);
+            }
+
+            if (!isReady) {
+                isReady = true;
+                ready(options.ready);
             }
             return jsMVC;
         };
 
     // Exports.
-    jsMVC.ready = ready;
+    jsMVC.config = config;
 
 }(this.window, !this.window && require, this.jsMVC || exports));

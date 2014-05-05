@@ -1,7 +1,7 @@
 ﻿/// <reference path="../tools/_references.js"/>
 /// <reference path="../source/_references.js"/>
 
-(function(browser, node, jsMVC, undefined) {
+(function (browser, node, jsMVC, undefined) {
     "use strict";
 
     if (browser) {
@@ -11,5 +11,5 @@
 
     QUnit.module("jsMVC.routing.node");
 
-    
+
 }(this.window, !this.window && require, this.jsMVC || jsMVC));
