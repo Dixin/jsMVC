@@ -4,7 +4,7 @@
 // v0.8 preview
 // Jan 14 2013 GMT-08
 //
-// Copyright (C) 2013 Dixin Yan http://weblogs.asp.net/dixin
+// Copyright (C) 2013 - 2014 Dixin Yan http://weblogs.asp.net/dixin
 // Released under the MIT license
 
 (function (browser, node, undefined) {
@@ -15,8 +15,8 @@
         previous = browser && browser.jsMVC,
         jQuery = browser && browser.jQuery,
         // Local variables.
-        jsMVC = function (callback) {
-            return jsMVC.config(callback);
+        jsMVC = function (options) {
+            return jsMVC.config(options);
         };
 
     jsMVC.version = 0.8;

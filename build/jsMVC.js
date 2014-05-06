@@ -4,7 +4,7 @@
 // v0.8 preview
 // Jan 14 2013 GMT-08
 //
-// Copyright (C) 2013 Dixin Yan http://weblogs.asp.net/dixin
+// Copyright (C) 2013 - 2014 Dixin Yan http://weblogs.asp.net/dixin
 // Released under the MIT license
 
 (function (browser, node, undefined) {
@@ -15,8 +15,8 @@
         previous = browser && browser.jsMVC,
         jQuery = browser && browser.jQuery,
         // Local variables.
-        jsMVC = function (callback) {
-            return jsMVC.config(callback); // jsMVC() is equal to jsMVC.config().
+        jsMVC = function (options) {
+            return jsMVC.config(options);
         };
 
     jsMVC.version = 0.8;
@@ -2393,10 +2393,8 @@
             }
         },
         handleError = function (event, errorObject, errorStatus, filterLevels) {
-            copyProps(event, {
-                status: errorStatus,
-                error: errorObject
-            }, true);
+            event.status = errorStatus;
+            event.error = errorObject;
             executeErrorFilters(event, filterLevels);
             if (!event.isErrorHandled()) {
                 throw errorObject;
@@ -2413,11 +2411,9 @@
 
             // 1. Validate segments.
             try {
-                copyProps(event, {
-                    actionId: validateRouteParameter(actionId),
-                    controllerId: validateRouteParameter(controllerId),
-                    areaId: validateRouteParameter(areaId, true)
-                });
+                event.actionId = validateRouteParameter(actionId);
+                event.controllerId = validateRouteParameter(controllerId);
+                event.areaId = validateRouteParameter(areaId, true);
             } catch (e) {
                 return handleError(event, e, status.badRequest, [globalFilters]);
             }
@@ -2431,12 +2427,10 @@
             }
 
             // Action is found.
-            copyProps(event, {
-                actionVirtualPath: action.virtualPath,
-                action: action,
-                controller: action.controller,
-                area: action.controller.area
-            });
+            event.actionVirtualPath = action.virtualPath;
+            event.action = action;
+            event.controller = action.controller;
+            event.area = action.controller.area;
             filterLevels = [
                 globalFilters,
                 event.area ? event.area.filters : null,
@@ -2473,7 +2467,6 @@
         // /Execute
 
         // MvcRouteHandler
-
         mvcRouteHandler = function (routeData, virtualPath) {
             executeAction(routeData, virtualPath, routeData.values.action, routeData.values.controller, routeData.dataTokens.area);
         },
@@ -2485,41 +2478,11 @@
             var route = new Route(options.url, options.defaults, options.constraints, options.dataTokens, mvcRouteHandler, options[idKey]);
 
             return routeTable.push(route);
-        },
+        };
         // /MvcRoutHandler
 
-        // Config
-        configKeys = {
-            areas: pushArea,
-            controllers: pushController,
-            routes: pushRoute
-        },
-        push = function (configs) {
-            if (isString(configs) && node) { // configs is a path.
-                configs = node(configs);
-            }
-            // Filters.
-            forEachItem(configs.filters, function (options) {
-                pushFilter(options);
-            });
-            // Areas, controllers, routes.
-            forEachKey(configKeys, function (configKey, pushMethod) {
-                forEachKey(configs[configKey], function (optionsKey, options) {
-                    if (!nativeHasOwn.call(options, idKey)) {
-                        options[idKey] = optionsKey;
-                    }
-                    pushMethod(options);
-                });
-            });
-
-            copyProps(push, configs);
-
-            return jsMVC;
-        };
-    // /Config
-
     // Exports.
-    jsMVC.Route = pushRoute;
+    jsMVC.Route = pushRoute; // Different from jsMVC.routeTable.Route.
     jsMVC.Area = pushArea;
     jsMVC.Controller = pushController;
     jsMVC.Filter = pushFilter;
@@ -2816,7 +2779,7 @@
             return constructor;
         }());
 
-    jsMVC.event.file = function (filePath, appPath) {
+    jsMVC.event.FileResult = function (filePath, appPath) {
         return new FileResult(this, filePath, appPath);
     };
 
@@ -4218,6 +4181,15 @@
 }(this.window, !this.window && require, this.jsMVC || exports));
 
 ﻿/// <reference path="jsMVC.js"/>
+/// <reference path="jsMVC._.js"/>
+/// <reference path="jsMVC.event.js"/>
+/// <reference path="jsMVC.routing.js"/>
+/// <reference path="jsMVC.routing.browser.js"/>
+/// <reference path="jsMVC.routing.node.js"/>
+/// <reference path="jsMVC.controller.js"/>
+/// <reference path="jsMVC.controller.event.js"/>
+/// <reference path="jsMVC.controller.event.browser.js"/>
+/// <reference path="jsMVC.controller.event.node.js"/>
 
 (function (browser, node, jsMVC, undefined) {
     "use strict";
@@ -4279,7 +4251,6 @@
             if (node && isString(options)) { // configs is a path.
                 options = node(options);
             }
-
             if (isObject(options)) {
                 // TODO: support reset.
 
@@ -4302,7 +4273,7 @@
 
             if (!isReady) {
                 isReady = true;
-                ready(options.ready);
+                ready(options && options.ready);
             }
             return jsMVC;
         };

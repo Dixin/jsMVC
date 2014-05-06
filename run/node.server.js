@@ -3,5 +3,5 @@
 
     var jsMVC = require("../build/jsMVC.js");
 
-    jsMVC.config("../run/node.config.js");
+    jsMVC.config("../run/node.server.config.js");
 }());

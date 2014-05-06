@@ -234,7 +234,7 @@
             return constructor;
         }());
 
-    jsMVC.event.file = function (filePath, appPath) {
+    jsMVC.event.FileResult = function (filePath, appPath) {
         return new FileResult(this, filePath, appPath);
     };
 

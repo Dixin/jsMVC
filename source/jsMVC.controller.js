@@ -454,10 +454,8 @@
             }
         },
         handleError = function (event, errorObject, errorStatus, filterLevels) {
-            copyProps(event, {
-                status: errorStatus,
-                error: errorObject
-            }, true);
+            event.status = errorStatus;
+            event.error = errorObject;
             executeErrorFilters(event, filterLevels);
             if (!event.isErrorHandled()) {
                 throw errorObject;
@@ -474,11 +472,9 @@
 
             // 1. Validate segments.
             try {
-                copyProps(event, {
-                    actionId: validateRouteParameter(actionId),
-                    controllerId: validateRouteParameter(controllerId),
-                    areaId: validateRouteParameter(areaId, true)
-                });
+                event.actionId = validateRouteParameter(actionId);
+                event.controllerId = validateRouteParameter(controllerId);
+                event.areaId = validateRouteParameter(areaId, true);
             } catch (e) {
                 return handleError(event, e, status.badRequest, [globalFilters]);
             }
@@ -492,12 +488,10 @@
             }
 
             // Action is found.
-            copyProps(event, {
-                actionVirtualPath: action.virtualPath,
-                action: action,
-                controller: action.controller,
-                area: action.controller.area
-            });
+            event.actionVirtualPath = action.virtualPath;
+            event.action = action;
+            event.controller = action.controller;
+            event.area = action.controller.area;
             filterLevels = [
                 globalFilters,
                 event.area ? event.area.filters : null,
@@ -534,7 +528,6 @@
         // /Execute
 
         // MvcRouteHandler
-
         mvcRouteHandler = function (routeData, virtualPath) {
             executeAction(routeData, virtualPath, routeData.values.action, routeData.values.controller, routeData.dataTokens.area);
         },
@@ -546,41 +539,11 @@
             var route = new Route(options.url, options.defaults, options.constraints, options.dataTokens, mvcRouteHandler, options[idKey]);
 
             return routeTable.push(route);
-        },
+        };
         // /MvcRoutHandler
 
-        // Config
-        configKeys = {
-            areas: pushArea,
-            controllers: pushController,
-            routes: pushRoute
-        },
-        push = function (configs) {
-            if (isString(configs) && node) { // configs is a path.
-                configs = node(configs);
-            }
-            // Filters.
-            forEachItem(configs.filters, function (options) {
-                pushFilter(options);
-            });
-            // Areas, controllers, routes.
-            forEachKey(configKeys, function (configKey, pushMethod) {
-                forEachKey(configs[configKey], function (optionsKey, options) {
-                    if (!nativeHasOwn.call(options, idKey)) {
-                        options[idKey] = optionsKey;
-                    }
-                    pushMethod(options);
-                });
-            });
-
-            copyProps(push, configs);
-
-            return jsMVC;
-        };
-    // /Config
-
     // Exports.
-    jsMVC.Route = pushRoute;
+    jsMVC.Route = pushRoute; // Different from jsMVC.routeTable.Route.
     jsMVC.Area = pushArea;
     jsMVC.Controller = pushController;
     jsMVC.Filter = pushFilter;

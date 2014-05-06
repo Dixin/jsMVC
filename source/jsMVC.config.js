@@ -1,4 +1,13 @@
 ﻿/// <reference path="jsMVC.js"/>
+/// <reference path="jsMVC._.js"/>
+/// <reference path="jsMVC.event.js"/>
+/// <reference path="jsMVC.routing.js"/>
+/// <reference path="jsMVC.routing.browser.js"/>
+/// <reference path="jsMVC.routing.node.js"/>
+/// <reference path="jsMVC.controller.js"/>
+/// <reference path="jsMVC.controller.event.js"/>
+/// <reference path="jsMVC.controller.event.browser.js"/>
+/// <reference path="jsMVC.controller.event.node.js"/>
 
 (function (browser, node, jsMVC, undefined) {
     "use strict";
@@ -60,32 +69,29 @@
             if (node && isString(options)) { // configs is a path.
                 options = node(options);
             }
-            options = options || {};
-            if (!isObject(options)) {
-                return jsMVC;
-            }
+            if (isObject(options)) {
+                // TODO: support reset.
 
-            // TODO: support reset.
-
-            // Filters.
-            forEachItem(options.filters, function (filter) {
-                pushFilter(filter);
-            });
-            // Areas, controllers, routes.
-            forEachKey(configKeys, function (configKey, pushMethod) {
-                forEachKey(options[configKey], function (optionsKey, optionsValue) {
-                    if (!nativeHasOwn.call(optionsValue, idKey)) {
-                        optionsValue[idKey] = optionsKey;
-                    }
-                    pushMethod(optionsValue);
+                // Filters.
+                forEachItem(options.filters, function (filter) {
+                    pushFilter(filter);
                 });
-            });
+                // Areas, controllers, routes.
+                forEachKey(configKeys, function (configKey, pushMethod) {
+                    forEachKey(options[configKey], function (optionsKey, optionsValue) {
+                        if (!nativeHasOwn.call(optionsValue, idKey)) {
+                            optionsValue[idKey] = optionsKey;
+                        }
+                        pushMethod(optionsValue);
+                    });
+                });
 
-            copyProps(config, options);
+                copyProps(config, options);
+            }
 
             if (!isReady) {
                 isReady = true;
-                ready(options.ready);
+                ready(options && options.ready);
             }
             return jsMVC;
         };

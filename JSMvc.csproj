@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -13,7 +13,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>JSMvc</RootNamespace>
     <AssemblyName>JSMvc</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
@@ -24,6 +24,7 @@
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
     <JSLintSkip>|\tests\jsMVC._.tests.js|\tests\jsMVC.bind.browser.tests.js|\tests\jsMVC.config.tests.js|\tests\jsMVC.controller.event.browser.tests.js|\tests\jsMVC.controller.event.node.tests.js|\tests\jsMVC.controller.event.tests.js|\tests\jsMVC.controller.tests.js|\tests\jsMVC.event.tests.js|\tests\jsMVC.observable.tests.js|\tests\jsMVC.routing.browser.tests.js|\tests\jsMVC.routing.node.tests.js|\tests\jsMVC.routing.tests.js|\tests\jsMVC.tests.js|\tests\jsMVC.bind.browser.tests.memory.js|\tools\jquery-1.11.0.js|\tools\jquery-1.11.0.intellisense.js|\tools\qunit-1.11.0.js|\build\|\tools\node_modules\|\tools\</JSLintSkip>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -54,7 +55,7 @@
     <Content Include=".gitattributes" />
     <Content Include=".gitignore" />
     <None Include="build\make" />
-    <Content Include="license.txt" />
+    <Content Include="MIT.txt" />
     <Content Include="run\browser.build.htm" />
     <Content Include="run\node.server.js" />
     <Content Include="run\node.test.js" />
@@ -91,13 +92,12 @@
     <Content Include="tests\jsMVC._.tests.js" />
     <Content Include="run\node.build.js" />
     <Content Include="run\node.min.js" />
-    <Content Include="tools\AllRules.ruleset" />
     <Content Include="tests\jsMVC.bind.browser.tests.memory.js" />
     <Content Include="tests\jsMVC.observable.tests.js" />
     <Content Include="tests\jsMVC.bind.browser.tests.memory.htm" />
     <Content Include="build\build.windows.wsf" />
     <Content Include="build\jsMVC.min.js.map" />
-    <Content Include="run\node.config.js" />
+    <Content Include="run\node.server.config.js" />
     <Content Include="run\node.debug.cmd" />
     <Content Include="build\make.cmd" />
     <Content Include="README.md" />

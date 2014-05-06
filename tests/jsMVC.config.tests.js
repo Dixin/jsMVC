@@ -4,7 +4,7 @@
 (function (browser, node, jsMVC, undefined) {
     "use strict";
 
-    QUnit.module("jsMVC.ready");
+    QUnit.module("jsMVC.config");
 
     test("Can call config multiple times", function () {
         var result = false,
