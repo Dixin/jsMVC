@@ -21,7 +21,7 @@
             return constructor;
         }());
 
-    jsMVC.event.noop = function () {
+    jsMVC.event.EmptyResult = function () {
         return new EmptyResult();
     };
 
