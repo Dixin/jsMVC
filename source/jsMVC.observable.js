@@ -26,37 +26,37 @@
             remove: "remove"
         },
 
-        triggerObservable = function (observable, eventType, newValue, oldValue, key) {
+        triggerListeners = function (observable, eventType, newValue, oldValue, key) {
             forEachItem(observable._eventListeners[eventType], function (listener) {
                 listener.call(observable, newValue, oldValue, eventType, key);
             });
             if (arguments.length > 4) {
-                forEachItem(observable._keyEventListeners[eventType][key], function (listener) {
+                forEachItem(observable._keyListeners[eventType][key], function (listener) {
                     listener.call(observable, newValue, oldValue, eventType, key);
                 });
             }
         },
 
-        addObservableKeyEventListener = function (observable, eventType, listener, key) {
-            var keyListeners = observable._keyEventListeners[eventType];
+        addKeyListener = function (observable, eventType, listener, key) {
+            var keyListeners = observable._keyListeners[eventType];
             if (!nativeHasOwn.call(keyListeners, key)) {
                 keyListeners[key] = [];
             }
             keyListeners[key].push(listener);
         },
 
-        addObservableEventListener = function (observable, eventType, listener) {
+        addEventListener = function (observable, eventType, listener) {
             observable._eventListeners[eventType].push(listener);
         },
 
-        removeObservableKeyListeners = function (observable, key) {
-            forEachKey(observable._keyEventListeners, function (eventType) {
-                observable._keyEventListeners[eventType][key] = [];
+        removeKeyListeners = function (observable, key) {
+            forEachKey(observable._keyListeners, function (eventType) {
+                observable._keyListeners[eventType][key] = [];
             });
         },
 
-        removeObservableKeyEventListeners = function (observable, eventType, key) {
-            var eventListeners = observable._keyEventListeners[eventType];
+        removeKeyListenersByEvent = function (observable, eventType, key) {
+            var eventListeners = observable._keyListeners[eventType];
             if (eventListeners) {
                 if (key in eventListeners) {
                     eventListeners[key] = [];
@@ -64,7 +64,7 @@
             }
         },
 
-        removeObservableEventListener = function (observable, eventType, listener) {
+        removeEventListener = function (observable, eventType, listener) {
             var eventListeners = observable._eventListeners[eventType],
                 index;
             if (eventListeners) {
@@ -78,23 +78,23 @@
             }
         },
 
-        removeObservableEventListeners = function (observable, eventType) {
+        removeEventListeners = function (observable, eventType) {
             var eventListeners = observable._eventListeners;
             if (eventType in eventListeners) {
                 eventListeners[eventType] = [];
             }
         },
 
-        removeObservableKeyEventListener = function (observable, eventType, listener, key) {
-            var eventListeners = observable._keyEventListeners[eventType],
-                keyEventListeners,
+        removeKeyListenerByEvent = function (observable, eventType, listener, key) {
+            var eventListeners = observable._keyListeners[eventType],
+                keyListeners,
                 index;
             if (eventListeners) {
-                keyEventListeners = eventListeners[key];
-                if (keyEventListeners) {
-                    for (index = 0; index < keyEventListeners.length;) {
-                        if (keyEventListeners[index] === listener) {
-                            keyEventListeners.splice(index, 1);
+                keyListeners = eventListeners[key];
+                if (keyListeners) {
+                    for (index = 0; index < keyListeners.length;) {
+                        if (keyListeners[index] === listener) {
+                            keyListeners.splice(index, 1);
                         } else {
                             index++;
                         }
@@ -103,7 +103,7 @@
             }
         },
 
-        removeObservableListener = function (observable, listener) {
+        removeListener = function (observable, listener) {
             var index;
             forEachKey(observable._eventListeners, function (eventType, eventListeners) {
                 for (index = 0; index < eventListeners.length;) {
@@ -114,7 +114,7 @@
                     }
                 }
             });
-            forEachKey(observable._keyEventListeners, function (eventType, eventListeners) {
+            forEachKey(observable._keyListeners, function (eventType, eventListeners) {
                 forEachKey(eventListeners, function (key, keyListeners) {
                     for (index = 0; index < keyListeners.length;) {
                         if (keyListeners[index] === listener) {
@@ -146,9 +146,9 @@
                     that._eventListeners[eventType] = [];
                 });
 
-                this._keyEventListeners = {};
-                forEachKey(eventTypes, function (keyEventType) {
-                    that._keyEventListeners[keyEventType] = {};
+                this._keyListeners = {};
+                forEachKey(eventTypes, function (eventType) {
+                    that._keyListeners[eventType] = {};
                 });
             };
 
@@ -170,7 +170,7 @@
                     var oldValue = this.data[key];
                     if (oldValue !== value) {
                         this.data[key] = value;
-                        triggerObservable(this, eventTypes.change, value, oldValue, key);
+                        triggerListeners(this, eventTypes.change, value, oldValue, key);
                     }
                     return this;
                 },
@@ -217,7 +217,7 @@
                             }
                         });
                     }
-                    triggerObservable(this, eventTypes.add, value, undefined, key);
+                    triggerListeners(this, eventTypes.add, value, undefined, key);
                     return this;
                 },
 
@@ -242,7 +242,7 @@
                         error("'index' must not be greater than array's length");
                     }
                     this.data.splice(index, 0, item);
-                    triggerObservable(this, eventTypes.add, item, undefined, index);
+                    triggerListeners(this, eventTypes.add, item, undefined, index);
                     return this;
                 },
 
@@ -256,8 +256,8 @@
                         for (key = 0; key < this.data.length; key++) {
                             if (this.data[key] === value) {
                                 this.data.splice(key, 1);
-                                triggerObservable(this, eventTypes.remove, undefined, value, key);
-                                removeObservableKeyListeners(this, key);
+                                triggerListeners(this, eventTypes.remove, undefined, value, key);
+                                removeKeyListeners(this, key);
                                 break;
                             }
                         }
@@ -266,8 +266,8 @@
                         key = args[0];
                         value = this.data[key];
                         delete this.data[key];
-                        triggerObservable(this, eventTypes.remove, undefined, value, key);
-                        removeObservableKeyListeners(this, key);
+                        triggerListeners(this, eventTypes.remove, undefined, value, key);
+                        removeKeyListeners(this, key);
                     }
                     return this;
                 },
@@ -311,15 +311,15 @@
                     }
                     var value = this.data[index];
                     this.data.splice(index, 1);
-                    triggerObservable(this, eventTypes.remove, undefined, value, index);
-                    removeObservableKeyListeners(this, index);
+                    triggerListeners(this, eventTypes.remove, undefined, value, index);
+                    removeKeyListeners(this, index);
                 },
 
                 on: function (eventType, listener, key) { // listener: function (newValue, oldValue, event, key) {}
                     if (arguments.length < 3) {
                         // on(eventType, listener)
                         if (isString(eventType)) {
-                            addObservableEventListener(this, eventType.toLowerCase(), listener);
+                            addEventListener(this, eventType.toLowerCase(), listener);
                             return this;
                         }
 
@@ -329,7 +329,7 @@
                         eventType = eventTypes.change;
                     }
                     // on(eventType, listener, key)
-                    addObservableKeyEventListener(this, eventType.toLowerCase(), listener, key);
+                    addKeyListener(this, eventType.toLowerCase(), listener, key);
                     return this;
                 },
 
@@ -341,7 +341,7 @@
 
                     if (isFunction(listener)) {
                         // off(listener)
-                        removeObservableListener(this, listener);
+                        removeListener(this, listener);
                         return this;
                     }
 
@@ -350,20 +350,20 @@
                         // off(eventType, listener, key)
                         listener = args[1];
                         key = args[2];
-                        removeObservableKeyEventListener(this, eventType, listener, key);
+                        removeKeyListenerByEvent(this, eventType, listener, key);
                     } else if (args.length === 2) {
                         listener = args[1];
                         if (isFunction(listener)) {
                             // off(eventType, listener)
-                            removeObservableEventListener(this, eventType, listener);
+                            removeEventListener(this, eventType, listener);
                         } else {
                             // off(eventType, key)
                             key = listener;
-                            removeObservableKeyEventListeners(this, eventType, key);
+                            removeKeyListenersByEvent(this, eventType, key);
                         }
                     } else {
                         // off(eventType)
-                        removeObservableEventListeners(this, eventType);
+                        removeEventListeners(this, eventType);
                     }
                     return this;
                 },

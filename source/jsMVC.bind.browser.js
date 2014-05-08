@@ -219,9 +219,7 @@
             default:
                 removeEventListener(element, eventType, listener);
         }
-    } : function (element, event, listener) {
-        removeEventListener(element, event.type, listener);
-    };
+    } : removeEventListener;
     var isBindBackSupported = function (element, event) {
         switch (event.type) {
             case "propertychange":
