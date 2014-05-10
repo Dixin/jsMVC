@@ -40,6 +40,10 @@
             return value.replace(/^\s+|\s+$/g, "");
         },
         // Constants.
+        nodeType = { // http://www.w3schools.com/jsref/prop_node_nodetype.asp
+            element: 1,
+            text: 3
+        },
         testElement = document.createElement("div"),
         dataPrefix = "data-",
         bindKey = "bind",
@@ -212,7 +216,7 @@
         }
     }());
     var removeChangeEventListener = browser.ActiveXObject ? function (element, eventType, listener) {
-        switch (type) {
+        switch (eventType) {
             case "propertychange":
             case "keyup":
                 element.detachEvent(eventTypePrefix + eventType, listener);
@@ -568,7 +572,7 @@
             childCount = 0;
 
         for (var child = parentElement.firstChild; child; child = parentElement.firstChild) { // TODO: Improve performance.
-            if (child.nodeType === 1 || child.nodeType === 3) { // Only keep element node and text node.
+            if (child.nodeType === nodeType.element || child.nodeType === nodeType.text) { // Only keep element node and text node.
                 templateFragment.appendChild(child);
                 childCount++;
             } else {
@@ -754,7 +758,7 @@
         if (!element) {
             return;
         }
-        if (element.nodeType === 3) { // Safari BUG
+        if (element.nodeType === nodeType.text) { // Safari BUG
             element = element.parentNode;
         }
         if (!isBindBackSupported(element, event)) {
@@ -855,7 +859,7 @@
             propertyBackMap,
             bindChildren = true,
             hasBinding = false;
-        if (element.nodeType !== 1) {
+        if (element.nodeType !== nodeType.element) {
             return bindChildren;
         }
         bindId = getElementBindIdAttribute(element);
@@ -908,7 +912,7 @@
 
     var bindSiblingElements = function (siblings, data, dataPathPrefix) {
         forEachItem(siblings, function (element) {
-            if (element.nodeType === 1) {
+            if (element.nodeType === nodeType.element) {
                 bindElementAndChildren(element, data, dataPathPrefix);
             }
         });

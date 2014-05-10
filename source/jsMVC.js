@@ -7,6 +7,8 @@
 // Copyright (C) 2013 - 2014 Dixin Yan http://weblogs.asp.net/dixin
 // Released under the MIT license
 
+/*global define module */
+
 (function (browser, node, undefined) {
     "use strict";
 

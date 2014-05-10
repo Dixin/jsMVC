@@ -1,4 +1,6 @@
-﻿(function () {
+﻿/*global console */
+
+(function () {
     "use strict";
 
     var build = require("../build/build.node.js"),

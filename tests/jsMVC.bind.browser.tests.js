@@ -12,7 +12,7 @@
     QUnit.module("jsMVC.bind.browser");
 
     var noop = function () {
-    },
+        },
         // http://darktalker.com/2010/manually-trigger-dom-event/
         fireEvent = function (element, event) {
             var evt;
@@ -33,8 +33,8 @@
         };
 
     var Observable = jsMVC.Observable,
-        dataBind = jsMVC.bind,
-        dataUnbind = jsMVC.unbind;
+        bind = jsMVC.bind,
+        unbind = jsMVC.unbind;
 
     test("Can bind element with observable object and can unbind", function () {
         var $root = $('<div data-bind="textContent:fullName; style.marginLeft: marginLeft; click: click"></div>');
@@ -50,7 +50,7 @@
         }).add("fullName", function (firstName, lastName) {
             return firstName + " " + lastName;
         }, ["firstName", "lastName"]);
-        dataBind(root, data);
+        bind(root, data);
         equal($root.text(), "A B");
         equal(root.innerHTML, "A B");
         equal(root.style.marginLeft, "2px");
@@ -76,7 +76,7 @@
         equal(root.innerHTML, "X B");
         equal(root.style.marginLeft, "10%");
 
-        dataUnbind(root);
+        unbind(root);
         data.set("marginLeft", "20%");
         data.set("firstName", "Y");
         equal(data.get("fullName"), "Y B");
@@ -112,7 +112,7 @@
             }
         };
 
-        dataBind(root, data);
+        bind(root, data);
         equal($root.text(), "A B");
         equal(root.innerHTML, "A B");
         equal(root.style.marginLeft, "5px");
@@ -137,7 +137,7 @@
         equal(root.innerHTML, "A B");
         equal(root.style.marginLeft, "5px");
 
-        dataUnbind(root);
+        unbind(root);
         equal($root.text(), "A B");
         equal(root.innerHTML, "A B");
         equal(root.style.marginLeft, "5px");
@@ -164,7 +164,7 @@
         }).add("button", function (label) {
             return "Submit " + label;
         }, ["label"]);
-        dataBind(root, data);
+        bind(root, data);
         equal($root.css("marginLeft"), "2px");
         equal($root.prop("action"), "http://jsmvc.net/");
         equal($root.find("span").text(), "Name");
@@ -188,7 +188,7 @@
         equal(isClicked1, false);
         equal(isClicked2, true);
 
-        dataUnbind(root);
+        unbind(root);
         data.set("label", 999);
         equal(data.get("label"), 999);
         equal(data.get("button"), "Submit 999");
@@ -218,7 +218,7 @@
         }).add("button", function (label) {
             return "Submit " + label;
         }, ["label"]);
-        dataBind(root1, data);
+        bind(root1, data);
         equal($root1.css("marginLeft"), "2px");
         equal($root1.prop("action"), "http://jsmvc.net/");
         equal($root1.find("span").text(), "Name");
@@ -226,7 +226,7 @@
         equal($root1.find("input[type='text']").val(), 123);
         equal($root1.find("input[type='button']").val(), "Submit Name");
 
-        dataBind(root2, data);
+        bind(root2, data);
         equal($root2.eq(0).css("marginLeft"), "2px");
         equal($root2.eq(0).text(), "Name");
         equal($root2.eq(0).html(), "Name");
@@ -244,7 +244,7 @@
         equal($root2.eq(1).text(), "Submit 888");
         equal($root2.eq(1).html(), "Submit 888");
 
-        dataUnbind(root1);
+        unbind(root1);
         data.set("label", 999);
         equal(data.get("label"), 999);
         equal(data.get("button"), "Submit 999");
@@ -256,7 +256,7 @@
         equal($root2.eq(1).text(), "Submit 999");
         equal($root2.eq(1).html(), "Submit 999");
 
-        dataUnbind(root2);
+        unbind(root2);
         data.set("label", 555);
         equal(data.get("label"), 555);
         equal(data.get("button"), "Submit 555");
@@ -281,7 +281,7 @@
             value: 123,
             button: "Submit Name"
         };
-        dataBind(root1, data);
+        bind(root1, data);
         equal($root1.css("marginLeft"), "2px");
         equal($root1.prop("action"), "http://jsmvc.net/");
         equal($root1.find("span").text(), "Name");
@@ -289,7 +289,7 @@
         equal($root1.find("input[type='text']").val(), 123);
         equal($root1.find("input[type='button']").val(), "Submit Name");
 
-        dataBind(root2, data);
+        bind(root2, data);
         equal($root2.eq(0).css("marginLeft"), "2px");
         equal($root2.eq(0).text(), "Name");
         equal($root2.eq(0).html(), "Name");
@@ -307,7 +307,7 @@
         equal($root2.eq(1).text(), "Submit Name");
         equal($root2.eq(1).html(), "Submit Name");
 
-        dataUnbind(root1);
+        unbind(root1);
         data.label = 999;
         equal(data.label, 999);
         equal($root1.find("span").text(), "Name");
@@ -318,7 +318,7 @@
         equal($root2.eq(1).text(), "Submit Name");
         equal($root2.eq(1).html(), "Submit Name");
 
-        dataUnbind(root2);
+        unbind(root2);
         data.label = 555;
         equal(data.label, 555);
         equal($root1.find("span").text(), "Name");
@@ -342,7 +342,7 @@
                 name: "p2"
             })
         });
-        dataBind(root, data);
+        bind(root, data);
         equal($root.css("marginLeft"), "2px");
         equal($root.find("div").eq(0).html(), "p1");
         equal($root.find("div").eq(1).html(), "p2");
@@ -387,7 +387,7 @@
         equal($root.find("div").eq(0).text(), "pp3");
         equal($root.find("div").eq(1).text(), "pp4");
 
-        dataUnbind(root);
+        unbind(root);
         data.set("marginLeft", "4px");
         equal($root.css("marginLeft"), "3px");
 
@@ -422,7 +422,7 @@
                 name: "p2"
             })
         });
-        dataBind(root, data);
+        bind(root, data);
         equal($root.css("marginLeft"), "2px");
         equal($root.find("div").eq(0).html(), "p1");
         equal($root.find("div").eq(1).html(), "p2");
@@ -470,7 +470,7 @@
         equal($root.find("div").eq(0).text(), "pp5");
         equal($root.find("div").eq(1).text(), "pp6");
 
-        dataUnbind(root);
+        unbind(root);
         data.set("marginLeft", "4px");
         equal($root.css("marginLeft"), "3px");
 
@@ -510,7 +510,7 @@
             ])
         });
 
-        dataBind(root, data);
+        bind(root, data);
         equal($root.css("marginLeft"), "10px");
         equal($root.children().length, 2);
         equal($root.children().eq(0).text(), "p1");
@@ -566,7 +566,7 @@
         data.get("persons").removeAt(0);
         equal($root.children().length, 2);
 
-        dataUnbind(root);
+        unbind(root);
         data.get("persons").get(0).set("name", "ppp1");
         equal($root.children().eq(0).text(), "p4");
         equal($root.children().eq(0).html(), "p4");
@@ -597,7 +597,7 @@
             }]
         };
 
-        dataBind(root, data);
+        bind(root, data);
         equal($root.css("marginLeft"), "10px");
         equal($root.children().length, 2);
         equal($root.children().eq(0).text(), "p1");
@@ -639,7 +639,7 @@
         equal($root.children().eq(1).text(), "p2");
         equal($root.children().eq(1).html(), "p2");
 
-        dataUnbind(root);
+        unbind(root);
         data["persons"][0]["name"] = "ppp1";
         equal($root.children().eq(0).text(), "p1");
         equal($root.children().eq(0).html(), "p1");
@@ -674,7 +674,7 @@
             ])
         });
 
-        dataBind(root, data);
+        bind(root, data);
         equal($root.css("marginLeft"), "10px");
         equal($root.children().length, 2);
         equal($root.children().eq(0).text(), "p1");
@@ -703,7 +703,7 @@
         equal($root.children().eq(1).html(), "ppp2");
         equal($root.children().eq(1).css("display"), "inline");
 
-        dataUnbind(root);
+        unbind(root);
         data.get("persons").get(0).set("name", "ppp1");
         equal($root.children().eq(0).text(), "pp1");
         equal($root.children().eq(0).html(), "pp1");
@@ -731,7 +731,7 @@
             }]
         };
 
-        dataBind(root, data);
+        bind(root, data);
         equal($root.css("marginLeft"), "10px");
         equal($root.children().length, 2);
         equal($root.children().eq(0).text(), "p1");
@@ -760,7 +760,7 @@
         equal($root.children().eq(1).html(), "p2");
         equal($root.children().eq(1).css("display"), "none");
 
-        dataUnbind(root);
+        unbind(root);
         data["persons"][0]["name"] = "ppp1";
         equal($root.children().eq(0).text(), "p1");
         equal($root.children().eq(0).html(), "p1");
@@ -811,7 +811,7 @@
                 })])
         });
 
-        dataBind(root, data);
+        bind(root, data);
 
         equal($root.children("li").length, 2);
         equal($root.children().eq(0).children().length, 2);
@@ -904,7 +904,7 @@
         equal($root.children().eq(1).children().eq(1).children().eq(0).find("span").html(), 7);
         equal($root.children().eq(1).children().eq(1).children().eq(0).find("span").text(), 7);
 
-        dataUnbind(root);
+        unbind(root);
         equal($root.children("li").length, 2);
         equal($root.children("li").eq(0).children("ul").children("li").length, 2);
         equal($root.children("li").eq(1).children("ul").children("li").length, 1);
@@ -927,10 +927,10 @@
         var $root = $('<div data-bind="textContent: this"></div>');
         var root = $root[0];
         var data = "abc";
-        dataBind(root, data);
+        bind(root, data);
         equal($root.html(), "abc");
         equal($root.text(), "abc");
-        dataUnbind(root);
+        unbind(root);
 
         $root = $('<ul data-each="this"><li data-bind="textContent: this"></li></ul>');
         root = $root[0];
@@ -938,7 +938,7 @@
             "p0",
             "p1"
         ]);
-        dataBind(root, data);
+        bind(root, data);
         equal($root.children("li").length, 2);
         equal($root.children("li").eq(0).html(), "p0");
         equal($root.children("li").eq(0).text(), "p0");
@@ -973,7 +973,7 @@
                 data.set("textValue", "reset");
             }
         });
-        dataBind(root, data);
+        bind(root, data);
         equal($root.find("input[type='text']").val(), "");
         equal($root.find("div").text(), "");
         equal($root.find("input[type='button']").val(), "The button text");
@@ -990,7 +990,7 @@
         equal($root.find("input[type='text']").val(), "reset");
         equal($root.find("div").text(), "reset");
 
-        dataUnbind(root);
+        unbind(root);
         $root.find("input[type='text']").val("bb");
         equal($root.find("input[type='text']").val(), "bb");
         if (browser.document.onpropertychange !== undefined) { // Only IE monitors DOM change.

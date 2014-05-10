@@ -69,7 +69,7 @@
           <string>camelcase</string>
         </key>
         <value>
-          <boolean>false</boolean>
+          <boolean>true</boolean>
         </value>
       </item>
       <item>
@@ -605,7 +605,7 @@
           <string>white</string>
         </key>
         <value>
-          <boolean>false</boolean>
+          <boolean>true</boolean>
         </value>
       </item>
       <item>
@@ -690,6 +690,10 @@
     <MaxParams xsi:nil="true" />
     <SelectedLinter>JSHint</SelectedLinter>
     <FindTodos>false</FindTodos>
+    <PreDefined>
+      <string>require</string>
+      <string>exports</string>
+    </PreDefined>
   </JSLintOptions>
   <BuildFileTypes>JS</BuildFileTypes>
   <SaveFileTypes>JS</SaveFileTypes>

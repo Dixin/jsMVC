@@ -1,4 +1,6 @@
-﻿(function () {
+﻿/*global module, process */
+
+(function () {
     "use strict";
 
     exports = module.exports = {

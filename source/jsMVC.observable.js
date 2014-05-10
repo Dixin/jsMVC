@@ -175,7 +175,7 @@
                     return this;
                 },
 
-                add: function () {
+                add: function () { // TODO: Consider merging with set.
                     var args = arguments,
                         key,
                         value,
@@ -387,6 +387,17 @@
                     var backup = this.data;
                     this.removeAll();
                     backup.sort(compare);
+                    forEachItem(backup, this.push);
+                },
+
+                reverse: function () {
+                    if (!this.isArray) {
+                        error("Reversing must be used for array.");
+                    }
+
+                    var backup = this.data;
+                    this.removeAll();
+                    backup.reverse();
                     forEachItem(backup, this.push);
                 }
             };
