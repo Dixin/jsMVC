@@ -90,6 +90,7 @@
             textinput: true,
             unload: true,
             wheel: true
+            // TODO: Touch events.
         },
         propertyComplianceMap = (function () {
             var map = {};

@@ -20,10 +20,8 @@
         },
         off = function (eventType, callback) {
             var callbacks = eventCallbacks[eventType];
-            if (callbacks) {
-                if (callbacks.remove(callback) === 0) {
-                    delete eventCallbacks[eventType];
-                }
+            if (callbacks && callbacks.remove(callback) === 0) {
+                delete eventCallbacks[eventType];
             }
         },
         trigger = function (eventType) {
@@ -62,7 +60,7 @@
 
     // Exports.
     jsMVC.event = Event.prototype,
-    jsMVC.on = on;
+    jsMVC.on = on; // TODO: Redesign.
     jsMVC.off = off,
     _.Event = Event,
     _.trigger = trigger;

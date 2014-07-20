@@ -76,8 +76,10 @@
                 newHash: newHash,
                 oldHash: options.oldHash || getHash(previousHref),
 
-                request: undefined,
-                response: undefined
+                request: null,
+                response: null,
+                serverDomain: null,
+                requestDomain: null
             }, true);
             previousHref = currentHref;
             return event;
@@ -174,8 +176,9 @@
                 // Other old browser.
                 error("Please upgrade browser to latest version.");
             }
+
             if (isFunction(callback)) {
-                callback(iframeWindow || browser);
+                callback(normalizeEvent());
             }
         },
     // /Browser

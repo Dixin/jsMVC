@@ -7,6 +7,8 @@
 // Copyright (C) 2013 - 2014 Dixin Yan http://weblogs.asp.net/dixin
 // Released under the MIT license
 
+/*global define module */
+
 (function (browser, node, undefined) {
     "use strict";
 
@@ -374,10 +376,8 @@
         },
         off = function (eventType, callback) {
             var callbacks = eventCallbacks[eventType];
-            if (callbacks) {
-                if (callbacks.remove(callback) === 0) {
-                    delete eventCallbacks[eventType];
-                }
+            if (callbacks && callbacks.remove(callback) === 0) {
+                delete eventCallbacks[eventType];
             }
         },
         trigger = function (eventType) {
@@ -416,7 +416,7 @@
 
     // Exports.
     jsMVC.event = Event.prototype,
-    jsMVC.on = on;
+    jsMVC.on = on; // TODO: Redesign.
     jsMVC.off = off,
     _.Event = Event,
     _.trigger = trigger;
@@ -562,7 +562,8 @@
             var parts = [],
                 currentIndex,
                 indexOfNextSeparator,
-                nextPart;
+                nextPart,
+                finalPart;
             if (!url || url.length === 0) {
                 return parts;
             }
@@ -573,7 +574,7 @@
                 indexOfNextSeparator = url.indexOf(separator, currentIndex);
                 if (indexOfNextSeparator === -1) {
                     // If there are no more separators, the rest of the string is the last part.
-                    var finalPart = url.substring(currentIndex);
+                    finalPart = url.substring(currentIndex);
                     if (finalPart.length > 0) {
                         parts.push(finalPart);
                     }
@@ -594,7 +595,8 @@
             var pathSegments = [],
                 index,
                 pathSegment,
-                isCurrentPartSeparator;
+                isCurrentPartSeparator,
+                subsegments;
 
             for (index = 0; index < urlParts.length; ++index) {
                 pathSegment = urlParts[index];
@@ -605,7 +607,7 @@
                         value: separator
                     });
                 } else {
-                    var subsegments = getUrlSubsegments(pathSegment);
+                    subsegments = getUrlSubsegments(pathSegment);
                     pathSegments.push({
                         type: contentType,
                         value: subsegments
@@ -724,7 +726,7 @@
                 routeUrl = emptyString;
             }
 
-            if (routeUrl[0] === separator || routeUrl.indexOf('?') !== -1) {
+            if (routeUrl[0] === separator || routeUrl.indexOf("?") !== -1) {
                 return null;
             }
 
@@ -773,6 +775,21 @@
             matchedValues[catchAllSubsegment.value] = catchAllValue;
         },
         matchContentSegment = function (routeSegment, requestPathSegment, defaultValues, matchedValues) {
+            var parameterSubsegment2,
+                parameterValue,
+                lastIndex,
+                indexOfLastSegmentUsed,
+                parameterNeedsValue,
+                lastLiteral,
+                newLastIndex,
+                parameterSubsegment,
+                literalSubsegment,
+                indexOfLiteral,
+                startIndex,
+                parameterStartIndex,
+                parameterTextLength,
+                parameterValueString;
+
             if (!requestPathSegment) {
                 // If there's no data to parse, we must have exactly one parameter segment and no other segments - otherwise no match
 
@@ -780,14 +797,14 @@
                     return false;
                 }
 
-                var parameterSubsegment2 = routeSegment.value[0];
+                parameterSubsegment2 = routeSegment.value[0];
                 if (parameterSubsegment2.type !== parameterType) {
                     return false;
                 }
 
                 // We must have a default value since there's no value in the request URL
                 if (nativeHasOwn.call(defaultValues, parameterSubsegment2.value)) {
-                    var parameterValue = defaultValues[parameterSubsegment2.value];
+                    parameterValue = defaultValues[parameterSubsegment2.value];
                     // If there's a default value for this parameter, use that default value
                     matchedValues[parameterSubsegment2.value] = parameterValue;
                     return true;
@@ -799,17 +816,16 @@
 
             // Find last literal segment and get its last index in the string
 
-            var lastIndex = requestPathSegment.length;
-            var indexOfLastSegmentUsed = routeSegment.value.length - 1;
+            lastIndex = requestPathSegment.length;
+            indexOfLastSegmentUsed = routeSegment.value.length - 1;
 
-            var parameterNeedsValue = null; // Keeps track of a parameter segment that is pending a value
-            var lastLiteral = null; // Keeps track of the left-most literal we've encountered
+            parameterNeedsValue = null; // Keeps track of a parameter segment that is pending a value
+            lastLiteral = null; // Keeps track of the left-most literal we've encountered
 
             while (indexOfLastSegmentUsed >= 0) {
-                var newLastIndex = lastIndex;
+                newLastIndex = lastIndex;
 
-                var parameterSubsegment = null;
-                var literalSubsegment;
+                parameterSubsegment = null;
                 if (routeSegment.value[indexOfLastSegmentUsed] && routeSegment.value[indexOfLastSegmentUsed].type === parameterType) {
                     // Hold on to the parameter so that we can fill it in when we locate the next literal
                     parameterSubsegment = routeSegment.value[indexOfLastSegmentUsed];
@@ -819,7 +835,7 @@
                         literalSubsegment = routeSegment.value[indexOfLastSegmentUsed];
                         lastLiteral = literalSubsegment;
 
-                        var startIndex = lastIndex - 1;
+                        startIndex = lastIndex - 1;
                         // If we have a pending parameter subsegment, we must leave at least one character for that
                         if (parameterNeedsValue !== null) {
                             startIndex--;
@@ -829,7 +845,7 @@
                             return false;
                         }
 
-                        var indexOfLiteral = requestPathSegment.lastIndexOf(literalSubsegment.value, startIndex);
+                        indexOfLiteral = requestPathSegment.lastIndexOf(literalSubsegment.value, startIndex);
                         if (indexOfLiteral === -1) {
                             // If we couldn't find this literal index, this segment cannot match
                             return false;
@@ -852,8 +868,6 @@
 
                 if (parameterNeedsValue !== null && ((lastLiteral !== null && parameterSubsegment === null) || indexOfLastSegmentUsed === 0)) {
                     // If we have a pending parameter that needs a value, grab that value
-                    var parameterStartIndex;
-                    var parameterTextLength;
 
                     if (lastLiteral === null) {
                         if (indexOfLastSegmentUsed === 0) {
@@ -873,7 +887,7 @@
                         }
                     }
 
-                    var parameterValueString = requestPathSegment.substr(parameterStartIndex, parameterTextLength);
+                    parameterValueString = requestPathSegment.substr(parameterStartIndex, parameterTextLength);
 
                     if (!parameterValueString) {
                         // If we're here that means we have a segment that contains multiple sub-segments.
@@ -902,33 +916,35 @@
             return (lastIndex === 0) || (routeSegment.value[0] && routeSegment.value[0].type === "parameter");
         },
         matchSegments = function (pathSegments, virtualPath, defaultValues) {
-            var requestPathSegments = getUrlParts(virtualPath);
+            var requestPathSegments = getUrlParts(virtualPath),
+                matchedValues = {},
+                // This flag gets set once all the data in the URL has been parsed through, but
+                // the route we're trying to match against still has more parts. At this point
+                // we'll only continue matching separator characters and parameters that have
+                // default values.
+                ranOutOfStuffToParse = false,
+                // This value gets set once we start processing a catchall parameter (if there is one
+                // at all). Once we set this value we consume all remaining parts of the URL into its
+                // parameter value.
+                usedCatchAllParameter = false,
+                i,
+                pathSegment,
+                requestPathSegment,
+                contentPathSegment,
+                j;
 
             if (!defaultValues) {
                 defaultValues = {};
             }
 
-            var matchedValues = {};
-
-            // This flag gets set once all the data in the URL has been parsed through, but
-            // the route we're trying to match against still has more parts. At this point
-            // we'll only continue matching separator characters and parameters that have
-            // default values.
-            var ranOutOfStuffToParse = false;
-
-            // This value gets set once we start processing a catchall parameter (if there is one
-            // at all). Once we set this value we consume all remaining parts of the URL into its
-            // parameter value.
-            var usedCatchAllParameter = false;
-
-            for (var i = 0; i < pathSegments.length; i++) {
-                var pathSegment = pathSegments[i];
+            for (i = 0; i < pathSegments.length; i++) {
+                pathSegment = pathSegments[i];
 
                 if (requestPathSegments.length <= i) {
                     ranOutOfStuffToParse = true;
                 }
 
-                var requestPathSegment = ranOutOfStuffToParse ? null : requestPathSegments[i];
+                requestPathSegment = ranOutOfStuffToParse ? null : requestPathSegments[i];
 
                 if (pathSegment && pathSegment.type === separatorType) {
                     // If we're trying to match a separator in the route but there's no more content, that's OK
@@ -938,7 +954,7 @@
                         }
                     }
                 } else {
-                    var contentPathSegment = pathSegment;
+                    contentPathSegment = pathSegment;
                     if (contentPathSegment && contentPathSegment.type === contentType) {
                         if (isSegmentCatchAll(contentPathSegment)) {
                             matchCatchAllSegment(contentPathSegment, requestPathSegments.slice(i), defaultValues, matchedValues);
@@ -958,7 +974,7 @@
                 if (pathSegments.length < requestPathSegments.length) {
                     // If we've already gone through all the parts defined in the route but the URL
                     // still contains more content, check that the remaining content is all separators.
-                    for (var j = pathSegments.length; j < requestPathSegments.length; j++) {
+                    for (j = pathSegments.length; j < requestPathSegments.length; j++) {
                         if (requestPathSegments[j] !== separator) {
                             return null;
                         }
@@ -978,23 +994,28 @@
             return matchedValues;
         },
         forEachParameterSubsegment = function (pathSegments, callback) {
-            for (var i = 0; i < pathSegments.length; i++) {
-                var pathSegment = pathSegments[i];
+            var i,
+                pathSegment,
+                contentPathSegment,
+                j,
+                subsegment,
+                parameterSubsegment;
+            for (i = 0; i < pathSegments.length; i++) {
+                pathSegment = pathSegments[i];
 
                 if (pathSegment.type === separatorType) {
                     // We only care about parameter subsegments, so skip this
                     continue;
                 } else {
-                    var contentPathSegment;
                     if (pathSegment.type === contentType) {
                         contentPathSegment = pathSegment;
-                        for (var j = 0; j < contentPathSegment.value.length; ++j) {
-                            var subsegment = contentPathSegment.value[j];
+                        for (j = 0; j < contentPathSegment.value.length; ++j) {
+                            subsegment = contentPathSegment.value[j];
                             if (subsegment.type === literalType) {
                                 // We only care about parameter subsegments, so skip this
                                 continue;
                             } else {
-                                var parameterSubsegment = subsegment;
+                                parameterSubsegment = subsegment;
                                 if (parameterSubsegment !== null) {
                                     if (!callback(parameterSubsegment)) {
                                         return false;
@@ -1068,10 +1089,36 @@
             defaultValues = defaultValues || {};
 
             // The set of values we should be using when generating the URL in this route
-            var acceptedValues = {};
+            var acceptedValues = {},
+                // Keep track of which new values have been used
+                unusedNewValues = {},
+                parameterName,
+                newParameterValue,
+                hasNewParameterValue,
+                currentParameterValue,
+                hasCurrentParameterValue,
+                parameterName2,
+                parameterSubsegment2,
+                result,
+                hasAllRequiredValues,
+                otherDefaultValues,
+                shouldReturnNull,
+                url,
+                pendingParts,
+                pendingPartsAreAllSafe,
+                i,
+                j,
+                pathSegment,
+                contentPathSegment,
+                addedAnySubsegments,
+                subsegment,
+                literalSubsegment,
+                parameterSubsegment3,
+                acceptedParameterValue,
+                hasAcceptedParameterValue,
+                defaultParameterValue,
+                firstParam;
 
-            // Keep track of which new values have been used
-            var unusedNewValues = {};
             forEachKey(values, function (key) {
                 unusedNewValues[key] = null;
             });
@@ -1084,16 +1131,16 @@
             // values should then be a="1", b="9", c=<no value>.
             forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
                 // If it's a parameter subsegment, examine the current value to see if it matches the new value
-                var parameterName = parameterSubsegment.value;
+                parameterName = parameterSubsegment.value;
 
-                var newParameterValue = values[parameterName];
-                var hasNewParameterValue = nativeHasOwn.call(values, parameterName);
+                newParameterValue = values[parameterName];
+                hasNewParameterValue = nativeHasOwn.call(values, parameterName);
                 if (hasNewParameterValue) {
                     delete unusedNewValues[parameterName];
                 }
 
-                var currentParameterValue = currentValues[parameterName];
-                var hasCurrentParameterValue = nativeHasOwn.call(currentValues, parameterName);
+                currentParameterValue = currentValues[parameterName];
+                hasCurrentParameterValue = nativeHasOwn.call(currentValues, parameterName);
 
                 if (hasNewParameterValue && hasCurrentParameterValue) {
                     if (!areRoutePartsEqual(currentParameterValue, newParameterValue)) {
@@ -1126,9 +1173,9 @@
 
             // Add all current values that aren't in the URL at all
             forEachKey(currentValues, function (currentKey, currentValue) {
-                var parameterName2 = currentKey;
+                parameterName2 = currentKey;
                 if (!nativeHasOwn.call(acceptedValues, parameterName2)) {
-                    var parameterSubsegment2 = getParameterSubsegment(pathSegments, parameterName2);
+                    parameterSubsegment2 = getParameterSubsegment(pathSegments, parameterName2);
                     if (parameterSubsegment2 === null) {
                         acceptedValues[parameterName2] = currentValue.Value;
                     }
@@ -1138,7 +1185,7 @@
             // Add all remaining default values from the route to the list of values we will use for URL generation
             forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
                 if (!nativeHasOwn.call(acceptedValues, parameterSubsegment.value)) {
-                    var result = isParameterRequired(parameterSubsegment, defaultValues);
+                    result = isParameterRequired(parameterSubsegment, defaultValues);
                     if (!result.isRequired) {
                         // Add the default value only if there isn't already a new value for it and
                         // only if it actually has a default value, which we determine based on whether
@@ -1150,7 +1197,7 @@
             });
 
             // All required parameters in this URL must have values from somewhere (i.e. the accepted values)
-            var hasAllRequiredValues = forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
+            hasAllRequiredValues = forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
                 var result = isParameterRequired(parameterSubsegment, defaultValues);
                 if (result.isRequired) {
                     if (!nativeHasOwn.call(acceptedValues, parameterSubsegment.value)) {
@@ -1168,13 +1215,13 @@
             }
 
             // All other default values must match if they are explicitly defined in the new values
-            var otherDefaultValues = getRouteValues(defaultValues);
+            otherDefaultValues = getRouteValues(defaultValues);
             forEachParameterSubsegment(pathSegments, function (parameterSubsegment) {
                 delete otherDefaultValues[parameterSubsegment.value];
                 return true;
             });
 
-            var shouldReturnNull = false;
+            shouldReturnNull = false;
             forEachKey(otherDefaultValues, function (defaultKey, defaultValue) {
                 if (nativeHasOwn.call(values, defaultKey)) {
                     delete unusedNewValues[defaultKey];
@@ -1193,13 +1240,13 @@
 
             // Step 2: If the route is a match generate the appropriate URL
 
-            var url = emptyString;
-            var pendingParts = emptyString;
+            url = emptyString;
+            pendingParts = emptyString;
 
-            var pendingPartsAreAllSafe = false;
+            pendingPartsAreAllSafe = false;
 
-            for (var i = 0; i < pathSegments.length; i++) {
-                var pathSegment = pathSegments[i]; // parsedRouteUrlPart
+            for (i = 0; i < pathSegments.length; i++) {
+                pathSegment = pathSegments[i]; // parsedRouteUrlPart
 
                 if (pathSegment.type === separatorType) {
                     if (pendingPartsAreAllSafe) {
@@ -1218,7 +1265,6 @@
                     }
                     pendingParts += separator;
                 } else {
-                    var contentPathSegment;
                     if (pathSegment.type === contentType) {
                         contentPathSegment = pathSegment;
                         // Segments are treated as all-or-none. We should never output a partial segment.
@@ -1227,18 +1273,16 @@
                         // used a value for {p1}, we have to output the entire segment up to the next "/".
                         // Otherwise we could end up with the partial segment "v1" instead of the entire
                         // segment "v1-v2.xml".
-                        var addedAnySubsegments = false;
+                        addedAnySubsegments = false;
 
-                        for (var j = 0; j < contentPathSegment.value.length; ++j) {
-                            var subsegment = contentPathSegment.value[j];
-                            var literalSubsegment;
+                        for (j = 0; j < contentPathSegment.value.length; ++j) {
+                            subsegment = contentPathSegment.value[j];
                             if (subsegment.type === literalType) {
                                 literalSubsegment = subsegment;
                                 // If it's a literal we hold on to it until we are sure we need to add it
                                 pendingPartsAreAllSafe = true;
                                 pendingParts += encodeUrl(literalSubsegment.value);
                             } else {
-                                var parameterSubsegment3;
                                 if (subsegment.type === parameterType) {
                                     parameterSubsegment3 = subsegment;
                                     if (pendingPartsAreAllSafe) {
@@ -1254,13 +1298,13 @@
                                     pendingPartsAreAllSafe = false;
 
                                     // If it's a parameter, get its value
-                                    var acceptedParameterValue = acceptedValues[parameterSubsegment3.value];
-                                    var hasAcceptedParameterValue = nativeHasOwn.call(acceptedValues, parameterSubsegment3.value);
+                                    acceptedParameterValue = acceptedValues[parameterSubsegment3.value];
+                                    hasAcceptedParameterValue = nativeHasOwn.call(acceptedValues, parameterSubsegment3.value);
                                     if (hasAcceptedParameterValue) {
                                         delete unusedNewValues[parameterSubsegment3.value];
                                     }
 
-                                    var defaultParameterValue = defaultValues[parameterSubsegment3.value];
+                                    defaultParameterValue = defaultValues[parameterSubsegment3.value];
 
                                     if (areRoutePartsEqual(acceptedParameterValue, defaultParameterValue)) {
                                         // If the accepted value is the same as the default value, mark it as pending since
@@ -1318,13 +1362,13 @@
             // Add remaining new values as query string parameters to the URL
             if (unusedNewValues) {
                 // Generate the query string
-                var firstParam = true;
+                firstParam = true;
                 forEachKey(unusedNewValues, function (unusedNewValue) {
                     if (nativeHasOwn.call(acceptedValues, unusedNewValue)) {
-                        url += firstParam ? '?' : '&';
+                        url += firstParam ? "?" : "&";
                         firstParam = false;
                         url += escapeUrlDataString(unusedNewValue);
-                        url += '=';
+                        url += "=";
                         url += escapeUrlDataString(acceptedValues[unusedNewValue].toString());
                     }
                 });
@@ -1356,7 +1400,9 @@
 
         // Route.
         processConstraint = function (route, constraint, virtualPath, parameterName, values, isIncomingRequest) {
-            var parameterValue = values[parameterName];
+            var parameterValue = values[parameterName],
+                parameterValueString,
+                constraintsRegEx;
             if (isFunction(constraint)) {
                 return constraint(parameterValue, virtualPath, route, parameterName, values, isIncomingRequest);
             }
@@ -1366,8 +1412,8 @@
                 error("'constraint' must be function or string");
             }
 
-            var parameterValueString = parameterValue.toString();
-            var constraintsRegEx = new RegExp("^(" + constraint + ")$", "i");
+            parameterValueString = parameterValue.toString();
+            constraintsRegEx = new RegExp("^(" + constraint + ")$", "i");
             return parameterValueString.match(constraintsRegEx);
         },
         processConstraints = function (route, constraints, virtualPath, values, isIncomingRequest) {
@@ -1414,7 +1460,8 @@
                 getVirtualPathData: function (routeValues, currentRouteValues /* optional */) {
                     routeValues = getRouteValues(routeValues);
                     currentRouteValues = getRouteValues(currentRouteValues);
-                    var result = bind(this._segments, currentRouteValues, routeValues, this.defaults, this.constraints);
+                    var result = bind(this._segments, currentRouteValues, routeValues, this.defaults, this.constraints),
+                        virtualPathData;
 
                     if (result === null) {
                         return null;
@@ -1425,7 +1472,7 @@
                         return null;
                     }
 
-                    var virtualPathData = new VirtualPathData(this, result.url, getRouteValues(this.dataTokens));
+                    virtualPathData = new VirtualPathData(this, result.url, getRouteValues(this.dataTokens));
                     return virtualPathData;
                 },
 
@@ -1434,7 +1481,8 @@
                         error("'virtualPath' must be string.");
                     }
                     virtualPath = virtualPath.toLowerCase();
-                    var values = matchSegments(this._segments, virtualPath, this.defaults);
+                    var values = matchSegments(this._segments, virtualPath, this.defaults),
+                        routeData;
                     if (values === null) {
                         // If we got back a null value set, that means the URL did not match
                         return null;
@@ -1447,7 +1495,7 @@
 
                     // Copy the matched values
                     // Copy the DataTokens from the Route to the RouteData
-                    var routeData = new RouteData(this, this.routeHandler, getRouteValues(values), getRouteValues(this.dataTokens));
+                    routeData = new RouteData(this, this.routeHandler, getRouteValues(values), getRouteValues(this.dataTokens));
 
                     return routeData;
                 }
@@ -1477,7 +1525,8 @@
         }()),
         RouteTable = function () {
             var namedRoutes = {},
-                allRoutes = [];
+                allRoutes = [],
+                index;
 
             this.getRouteData = function (virtualPath) {
                 if (!isString(virtualPath)) {
@@ -1485,7 +1534,7 @@
                 }
                 virtualPath = virtualPath.toLowerCase();
                 // Go through all the configured routes and find the first one that returns a match
-                for (var index = 0; index < allRoutes.length; ++index) {
+                for (index = 0; index < allRoutes.length; ++index) {
                     var routeData = allRoutes[index].getRouteData(virtualPath);
                     if (routeData) {
                         return routeData;
@@ -1499,11 +1548,15 @@
                     error("'filter' must be function.");
                 }
 
+                var index2,
+                    route,
+                    virtualPathData;
+
                 // Go through all the configured routes and find the first one that returns a match
-                for (var index = 0; index < allRoutes.length; ++index) {
-                    var route = allRoutes[index];
+                for (index2 = 0; index2 < allRoutes.length; ++index2) {
+                    route = allRoutes[index2];
                     if (!filter || filter(route)) {
-                        var virtualPathData = route.getVirtualPathData(routeValues, currentRouteValues);
+                        virtualPathData = route.getVirtualPathData(routeValues, currentRouteValues);
                         if (virtualPathData) {
                             return virtualPathData;
                         }
@@ -1650,8 +1703,10 @@
                 newHash: newHash,
                 oldHash: options.oldHash || getHash(previousHref),
 
-                request: undefined,
-                response: undefined
+                request: null,
+                response: null,
+                serverDomain: null,
+                requestDomain: null
             }, true);
             previousHref = currentHref;
             return event;
@@ -1748,8 +1803,9 @@
                 // Other old browser.
                 error("Please upgrade browser to latest version.");
             }
+
             if (isFunction(callback)) {
-                callback(iframeWindow || browser);
+                callback(normalizeEvent());
             }
         },
     // /Browser
@@ -1815,54 +1871,62 @@
         domain = node("domain"),
         prefix = "/",
         prefixLength = prefix.length,
-        server,
+        server = null,
+        serverDomain = null,
         normalizeEvent = function (options) {
             var event = new Event(),
+                process = global.process,
+                requestDomain = process.domain,
+                attachment = requestDomain._jsMVC,
                 request,
-                requestMethod,
-                virtualPath,
                 requestedUrl,
-                referrerUrl,
-                address;
+                virtualPath,
+                referrerUrl;
+
             options = options || {};
-            request = options.request;
 
-            if (request) { // Get info from request.
-                requestMethod = request.method;
+            if (!attachment) {
+                // In the context of server.
+                return copyProps(event, {
+                    type: null,
+                    // timeStamp is already in event.
+                    target: server,
+                    currentTarget: server,
+                    virtualPath: null,
+                    routeData: null,
 
-                requestedUrl = url.parse(request.url);
-                requestedUrl.protocol = request.connection.encrypted ? "https" : "http";
-                requestedUrl.host = request.headers.host;
+                    newHref: null,
+                    oldHref: null,
+                    newHash: null,
+                    oldHash: null,
 
-                referrerUrl = request.headers.referer || request.headers.Referer;
-            } else { // Get info from options.
-                // If options.url is provided, use options.url and ignore options.virtualPath.
-                requestMethod = options.type;
-                requestedUrl = options.newHref || options.virtualPath;
-                requestedUrl = url.parse(requestedUrl);
-                if (server) {
-                    address = server.address();
-                    if (address) {
-                        requestedUrl.hostname = address.address === "0.0.0.0" ? "localhost" : address.address;
-                        requestedUrl.port = address.port;
-                    }
-                }
-
-                referrerUrl = options.oldHref;
+                    request: null,
+                    response: null,
+                    serverDomain: serverDomain,
+                    requestDomain: null
+                });
             }
+
+            // In the context of request.
+            request = attachment.request;
+            requestedUrl = url.parse(options.newHref || request.url);
+            virtualPath = options.virtualPath || requestedUrl.pathname;
+            referrerUrl = options.referrerUrl || request.headers.referer || request.headers.Referer;
+
+            requestedUrl.protocol = request.connection.encrypted ? "https" : "http";
+            requestedUrl.host = request.headers.host;
 
             referrerUrl = referrerUrl !== undefined ? url.parse(referrerUrl) : {};
 
-            virtualPath = requestedUrl.pathname;
             if (virtualPath && virtualPath.substr(0, prefixLength) === prefix) {
                 virtualPath = virtualPath.substr(prefixLength); // Remove starting "/".
             }
 
             return copyProps(event, {
-                type: requestMethod,
+                type: request.method,
                 // timeStamp is already in event.
-                target: options.server || null,
-                currentTarget: options.server || null,
+                target: server,
+                currentTarget: server,
                 virtualPath: virtualPath,
                 routeData: virtualPath ? routeTable.getRouteData(virtualPath) : null,
 
@@ -1872,24 +1936,27 @@
                 oldHash: referrerUrl.hash,
 
                 request: request,
-                response: options.response
+                response: attachment.response,
+                serverDomain: serverDomain,
+                requestDomain: requestDomain
             });
         },
         listen = function (callback) {
-            var serverDomain = domain.create();
+            serverDomain = domain.create();
+
             serverDomain.run(function () {
                 server = http.createServer().on("request", function (request, response) {
-                    var requestDomian = domain.create(),
-                        event = normalizeEvent({
-                            request: request,
-                            response: response,
-                            domain: requestDomian,
-                            server: this // server.
-                        });
+                    var requestDomian = domain.create();
                     requestDomian.add(request);
                     requestDomian.add(response);
+                    requestDomian._jsMVC = {
+                        request: request,
+                        response: response
+                    };
+
                     requestDomian.on("error", function (error) {
                         try {
+                            var event = normalizeEvent();
                             event.status = status.internalError;
                             event.error = error;
                             trigger("fail", event);
@@ -1901,10 +1968,13 @@
                         }
                     });
 
-                    trigger("request", event);
+                    requestDomian.run(function () {
+                        trigger("request", normalizeEvent());
+                    });
                 });
+
                 if (isFunction(callback)) {
-                    callback(server, serverDomain);
+                    callback(normalizeEvent());
                 }
             });
         };
@@ -2962,7 +3032,7 @@
                     return this;
                 },
 
-                add: function () {
+                add: function () { // TODO: Consider merging with set.
                     var args = arguments,
                         key,
                         value,
@@ -3175,6 +3245,17 @@
                     this.removeAll();
                     backup.sort(compare);
                     forEachItem(backup, this.push);
+                },
+
+                reverse: function () {
+                    if (!this.isArray) {
+                        error("Reversing must be used for array.");
+                    }
+
+                    var backup = this.data;
+                    this.removeAll();
+                    backup.reverse();
+                    forEachItem(backup, this.push);
                 }
             };
             return constructor;
@@ -3242,6 +3323,10 @@
             return value.replace(/^\s+|\s+$/g, "");
         },
         // Constants.
+        nodeType = { // http://www.w3schools.com/jsref/prop_node_nodetype.asp
+            element: 1,
+            text: 3
+        },
         testElement = document.createElement("div"),
         dataPrefix = "data-",
         bindKey = "bind",
@@ -3288,6 +3373,7 @@
             textinput: true,
             unload: true,
             wheel: true
+            // TODO: Touch events.
         },
         propertyComplianceMap = (function () {
             var map = {};
@@ -3414,7 +3500,7 @@
         }
     }());
     var removeChangeEventListener = browser.ActiveXObject ? function (element, eventType, listener) {
-        switch (type) {
+        switch (eventType) {
             case "propertychange":
             case "keyup":
                 element.detachEvent(eventTypePrefix + eventType, listener);
@@ -3770,7 +3856,7 @@
             childCount = 0;
 
         for (var child = parentElement.firstChild; child; child = parentElement.firstChild) { // TODO: Improve performance.
-            if (child.nodeType === 1 || child.nodeType === 3) { // Only keep element node and text node.
+            if (child.nodeType === nodeType.element || child.nodeType === nodeType.text) { // Only keep element node and text node.
                 templateFragment.appendChild(child);
                 childCount++;
             } else {
@@ -3956,7 +4042,7 @@
         if (!element) {
             return;
         }
-        if (element.nodeType === 3) { // Safari BUG
+        if (element.nodeType === nodeType.text) { // Safari BUG
             element = element.parentNode;
         }
         if (!isBindBackSupported(element, event)) {
@@ -4057,7 +4143,7 @@
             propertyBackMap,
             bindChildren = true,
             hasBinding = false;
-        if (element.nodeType !== 1) {
+        if (element.nodeType !== nodeType.element) {
             return bindChildren;
         }
         bindId = getElementBindIdAttribute(element);
@@ -4110,7 +4196,7 @@
 
     var bindSiblingElements = function (siblings, data, dataPathPrefix) {
         forEachItem(siblings, function (element) {
-            if (element.nodeType === 1) {
+            if (element.nodeType === nodeType.element) {
                 bindElementAndChildren(element, data, dataPathPrefix);
             }
         });

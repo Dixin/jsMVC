@@ -25,54 +25,62 @@
         domain = node("domain"),
         prefix = "/",
         prefixLength = prefix.length,
-        server,
+        server = null,
+        serverDomain = null,
         normalizeEvent = function (options) {
             var event = new Event(),
+                process = global.process,
+                requestDomain = process.domain,
+                attachment = requestDomain._jsMVC,
                 request,
-                requestMethod,
-                virtualPath,
                 requestedUrl,
-                referrerUrl,
-                address;
+                virtualPath,
+                referrerUrl;
+
             options = options || {};
-            request = options.request;
 
-            if (request) { // Get info from request.
-                requestMethod = request.method;
+            if (!attachment) {
+                // In the context of server.
+                return copyProps(event, {
+                    type: null,
+                    // timeStamp is already in event.
+                    target: server,
+                    currentTarget: server,
+                    virtualPath: null,
+                    routeData: null,
 
-                requestedUrl = url.parse(request.url);
-                requestedUrl.protocol = request.connection.encrypted ? "https" : "http";
-                requestedUrl.host = request.headers.host;
+                    newHref: null,
+                    oldHref: null,
+                    newHash: null,
+                    oldHash: null,
 
-                referrerUrl = request.headers.referer || request.headers.Referer;
-            } else { // Get info from options.
-                // If options.url is provided, use options.url and ignore options.virtualPath.
-                requestMethod = options.type;
-                requestedUrl = options.newHref || options.virtualPath;
-                requestedUrl = url.parse(requestedUrl);
-                if (server) {
-                    address = server.address();
-                    if (address) {
-                        requestedUrl.hostname = address.address === "0.0.0.0" ? "localhost" : address.address;
-                        requestedUrl.port = address.port;
-                    }
-                }
-
-                referrerUrl = options.oldHref;
+                    request: null,
+                    response: null,
+                    serverDomain: serverDomain,
+                    requestDomain: null
+                });
             }
+
+            // In the context of request.
+            request = attachment.request;
+            requestedUrl = url.parse(options.newHref || request.url);
+            virtualPath = options.virtualPath || requestedUrl.pathname;
+            referrerUrl = options.referrerUrl || request.headers.referer || request.headers.Referer;
+
+            requestedUrl.protocol = request.connection.encrypted ? "https" : "http";
+            requestedUrl.host = request.headers.host;
 
             referrerUrl = referrerUrl !== undefined ? url.parse(referrerUrl) : {};
 
-            virtualPath = requestedUrl.pathname;
             if (virtualPath && virtualPath.substr(0, prefixLength) === prefix) {
                 virtualPath = virtualPath.substr(prefixLength); // Remove starting "/".
             }
 
             return copyProps(event, {
-                type: requestMethod,
+                type: request.method,
                 // timeStamp is already in event.
-                target: options.server || null,
-                currentTarget: options.server || null,
+                target: server,
+                currentTarget: server,
                 virtualPath: virtualPath,
                 routeData: virtualPath ? routeTable.getRouteData(virtualPath) : null,
 
@@ -82,24 +90,27 @@
                 oldHash: referrerUrl.hash,
 
                 request: request,
-                response: options.response
+                response: attachment.response,
+                serverDomain: serverDomain,
+                requestDomain: requestDomain
             });
         },
         listen = function (callback) {
-            var serverDomain = domain.create();
+            serverDomain = domain.create();
+
             serverDomain.run(function () {
                 server = http.createServer().on("request", function (request, response) {
-                    var requestDomian = domain.create(),
-                        event = normalizeEvent({
-                            request: request,
-                            response: response,
-                            domain: requestDomian,
-                            server: this // server.
-                        });
+                    var requestDomian = domain.create();
                     requestDomian.add(request);
                     requestDomian.add(response);
+                    requestDomian._jsMVC = {
+                        request: request,
+                        response: response
+                    };
+
                     requestDomian.on("error", function (error) {
                         try {
+                            var event = normalizeEvent();
                             event.status = status.internalError;
                             event.error = error;
                             trigger("fail", event);
@@ -111,10 +122,13 @@
                         }
                     });
 
-                    trigger("request", event);
+                    requestDomian.run(function () {
+                        trigger("request", normalizeEvent());
+                    });
                 });
+
                 if (isFunction(callback)) {
-                    callback(server, serverDomain);
+                    callback(normalizeEvent());
                 }
             });
         };

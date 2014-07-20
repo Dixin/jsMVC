@@ -1,4 +1,4 @@
-﻿/*global module, process */
+﻿/*global module */
 
 (function () {
     "use strict";
@@ -37,8 +37,9 @@
                 }
             }
         },
-        ready: function (server) {
-            server.listen(process.env.PORT || 8000, process.env.IP); // Cloud9 uses process.env.PORT and process.env.IP.
+        ready: function (event) {
+            var server = event.target;
+            server.listen(global.process.env.PORT || 8000, global.process.env.IP); // Cloud9 uses process.env.PORT and process.env.IP.
         }
     };
 }());
